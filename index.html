@@ -41,7 +41,6 @@
             const [activeTab, setActiveTab] = useState('tournament');
             const [filterRound, setFilterRound] = useState('all');
             const [filterPlayer, setFilterPlayer] = useState('all');
-            const [savedVersions, setSavedVersions] = useState([]);
             const [showSaveIndicator, setShowSaveIndicator] = useState(false);
             const [knockoutScores, setKnockoutScores] = useState({
                 qf1: { team1Score: null, team2Score: null },
@@ -53,7 +52,6 @@
                 final: { team1Score: null, team2Score: null }
             });
             const [knockoutMaxScore, setKnockoutMaxScore] = useState(16);
-            const [semiMaxScore, setSemiMaxScore] = useState(16);
             const [finalMaxScore, setFinalMaxScore] = useState(16);
             
             // Initialize state from localStorage
@@ -284,6 +282,33 @@
                 });
             };
 
+            const handleKnockoutScore = (match, team, value) => {
+                const maxScore = match === 'final' ? finalMaxScore : knockoutMaxScore;
+                const score = parseInt(value) || null;
+                if (score !== null && (score < 0 || score > maxScore)) return;
+                
+                setKnockoutScores(prev => {
+                    const newScores = { ...prev };
+                    if (!newScores[match]) newScores[match] = { team1Score: null, team2Score: null };
+                    
+                    if (team === 'team1') {
+                        newScores[match].team1Score = score;
+                        newScores[match].team2Score = score !== null ? maxScore - score : null;
+                    } else {
+                        newScores[match].team2Score = score;
+                        newScores[match].team1Score = score !== null ? maxScore - score : null;
+                    }
+                    return newScores;
+                });
+            };
+
+            const clearKnockoutScore = (match) => {
+                setKnockoutScores(prev => ({
+                    ...prev,
+                    [match]: { team1Score: null, team2Score: null }
+                }));
+            };
+
             const getTierColor = (playerNum) => {
                 const tierColors = ['#DC2626', '#EA580C', '#CA8A04', '#16A34A', '#2563EB', '#7C3AED'];
                 const tierIndex = Math.floor((playerNum - 1) / 4);
@@ -296,7 +321,7 @@
                 return tierNames[tierIndex] || 'Unranked';
             };
 
-            function PlayerBadge({ playerNum, isPartnership = false, showRating = false }) {
+            function PlayerBadge({ playerNum, isPartnership = false }) {
                 return (
                     <div className={`${isPartnership ? 'mr-1' : 'mx-1'} transition-all duration-200 hover:shadow-lg`}>
                         <span 
@@ -306,11 +331,6 @@
                         >
                             {playerNames[playerNum - 1]}
                         </span>
-                        {showRating && (
-                            <div className="text-xs text-gray-500 text-center mt-1">
-                                {skillRatings[playerNum]}
-                            </div>
-                        )}
                     </div>
                 );
             }
@@ -421,6 +441,384 @@
                 );
             }
 
+            function ResultsTab() {
+                const playerStats = {};
+                
+                for (let i = 1; i <= 24; i++) {
+                    playerStats[i] = {
+                        matches: 0, wins: 0, losses: 0, draws: 0, points: 0, pointsFor: 0, pointsAgainst: 0
+                    };
+                }
+                
+                fixtures.forEach((round, roundIndex) => {
+                    const roundNum = roundIndex + 1;
+                    round.forEach((match, matchIndex) => {
+                        const matchNum = matchIndex + 1;
+                        const scores = matchScores[roundNum]?.[matchNum];
+                        
+                        if (scores && scores.team1Score !== null && scores.team2Score !== null) {
+                            const [team1p1, team1p2, team2p1, team2p2] = match;
+                            const team1Score = scores.team1Score;
+                            const team2Score = scores.team2Score;
+                            
+                            [team1p1, team1p2, team2p1, team2p2].forEach(player => {
+                                playerStats[player].matches++;
+                            });
+                            
+                            playerStats[team1p1].pointsFor += team1Score;
+                            playerStats[team1p1].pointsAgainst += team2Score;
+                            playerStats[team1p2].pointsFor += team1Score;
+                            playerStats[team1p2].pointsAgainst += team2Score;
+                            playerStats[team2p1].pointsFor += team2Score;
+                            playerStats[team2p1].pointsAgainst += team1Score;
+                            playerStats[team2p2].pointsFor += team2Score;
+                            playerStats[team2p2].pointsAgainst += team1Score;
+                            
+                            if (team1Score > team2Score) {
+                                playerStats[team1p1].wins++;
+                                playerStats[team1p2].wins++;
+                                playerStats[team2p1].losses++;
+                                playerStats[team2p2].losses++;
+                                playerStats[team1p1].points += 3;
+                                playerStats[team1p2].points += 3;
+                            } else if (team2Score > team1Score) {
+                                playerStats[team2p1].wins++;
+                                playerStats[team2p2].wins++;
+                                playerStats[team1p1].losses++;
+                                playerStats[team1p2].losses++;
+                                playerStats[team2p1].points += 3;
+                                playerStats[team2p2].points += 3;
+                            } else {
+                                playerStats[team1p1].draws++;
+                                playerStats[team1p2].draws++;
+                                playerStats[team2p1].draws++;
+                                playerStats[team2p2].draws++;
+                                playerStats[team1p1].points += 1;
+                                playerStats[team1p2].points += 1;
+                                playerStats[team2p1].points += 1;
+                                playerStats[team2p2].points += 1;
+                            }
+                        }
+                    });
+                });
+                
+                const sortedPlayers = Object.entries(playerStats)
+                    .map(([player, stats]) => ({
+                        player: parseInt(player), ...stats,
+                        winRate: stats.matches > 0 ? (stats.wins / stats.matches * 100).toFixed(1) : '0.0',
+                        pointsDiff: stats.pointsFor - stats.pointsAgainst
+                    }))
+                    .sort((a, b) => {
+                        if (b.points !== a.points) return b.points - a.points;
+                        if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
+                        return b.pointsFor - a.pointsFor;
+                    });
+                
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Player Standings</h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="text-left py-2 px-3">Rank</th>
+                                        <th className="text-left py-2 px-3">Player</th>
+                                        <th className="text-center py-2 px-3">Points</th>
+                                        <th className="text-center py-2 px-3">Matches</th>
+                                        <th className="text-center py-2 px-3">Wins</th>
+                                        <th className="text-center py-2 px-3">Draws</th>
+                                        <th className="text-center py-2 px-3">Losses</th>
+                                        <th className="text-center py-2 px-3">Win Rate</th>
+                                        <th className="text-center py-2 px-3">For</th>
+                                        <th className="text-center py-2 px-3">Against</th>
+                                        <th className="text-center py-2 px-3">Diff</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedPlayers.map((playerData, index) => (
+                                        <tr key={playerData.player} className={`border-b ${index < 3 ? 'bg-yellow-50' : ''}`}>
+                                            <td className="py-2 px-3 font-semibold">
+                                                {index + 1}
+                                                {index === 0 && ' 🥇'}
+                                                {index === 1 && ' 🥈'}
+                                                {index === 2 && ' 🥉'}
+                                            </td>
+                                            <td className="py-2 px-3">
+                                                <PlayerBadge playerNum={playerData.player} />
+                                            </td>
+                                            <td className="text-center py-2 px-3 font-bold text-lg text-blue-600">{playerData.points}</td>
+                                            <td className="text-center py-2 px-3">{playerData.matches}</td>
+                                            <td className="text-center py-2 px-3 text-green-600 font-semibold">{playerData.wins}</td>
+                                            <td className="text-center py-2 px-3 text-yellow-600">{playerData.draws}</td>
+                                            <td className="text-center py-2 px-3 text-red-600">{playerData.losses}</td>
+                                            <td className="text-center py-2 px-3">{playerData.winRate}%</td>
+                                            <td className="text-center py-2 px-3">{playerData.pointsFor}</td>
+                                            <td className="text-center py-2 px-3">{playerData.pointsAgainst}</td>
+                                            <td className={`text-center py-2 px-3 font-semibold ${
+                                                playerData.pointsDiff > 0 ? 'text-green-600' : 
+                                                playerData.pointsDiff < 0 ? 'text-red-600' : 'text-gray-600'
+                                            }`}>
+                                                {playerData.pointsDiff > 0 ? '+' : ''}{playerData.pointsDiff}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            }
+
+            function FairnessTab() {
+                const playerFairness = {};
+                
+                for (let i = 1; i <= 24; i++) {
+                    playerFairness[i] = {
+                        rounds: [],
+                        totalDiff: 0,
+                        avgDiff: 0,
+                        hardestRound: null,
+                        easiestRound: null
+                    };
+                }
+                
+                fixtures.forEach((round, roundIndex) => {
+                    const roundNum = roundIndex + 1;
+                    round.forEach((match) => {
+                        const [team1p1, team1p2, team2p1, team2p2] = match;
+                        
+                        const team1Rating = skillRatings[team1p1] + skillRatings[team1p2];
+                        const team2Rating = skillRatings[team2p1] + skillRatings[team2p2];
+                        
+                        const team1Fairness = (team1Rating - team2Rating).toFixed(2);
+                        const team2Fairness = (team2Rating - team1Rating).toFixed(2);
+                        
+                        playerFairness[team1p1].rounds.push({ round: roundNum, fairness: parseFloat(team1Fairness) });
+                        playerFairness[team1p2].rounds.push({ round: roundNum, fairness: parseFloat(team1Fairness) });
+                        playerFairness[team2p1].rounds.push({ round: roundNum, fairness: parseFloat(team2Fairness) });
+                        playerFairness[team2p2].rounds.push({ round: roundNum, fairness: parseFloat(team2Fairness) });
+                        
+                        playerFairness[team1p1].totalDiff += parseFloat(team1Fairness);
+                        playerFairness[team1p2].totalDiff += parseFloat(team1Fairness);
+                        playerFairness[team2p1].totalDiff += parseFloat(team2Fairness);
+                        playerFairness[team2p2].totalDiff += parseFloat(team2Fairness);
+                    });
+                });
+                
+                Object.keys(playerFairness).forEach(player => {
+                    const data = playerFairness[player];
+                    data.avgDiff = (data.totalDiff / data.rounds.length).toFixed(2);
+                    
+                    const sortedRounds = [...data.rounds].sort((a, b) => a.fairness - b.fairness);
+                    data.hardestRound = sortedRounds[0];
+                    data.easiestRound = sortedRounds[sortedRounds.length - 1];
+                });
+                
+                const sortedPlayers = Object.entries(playerFairness)
+                    .map(([player, data]) => ({ player: parseInt(player), ...data }))
+                    .sort((a, b) => a.totalDiff - b.totalDiff);
+                
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Fairness Analysis</h2>
+                        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                            <h4 className="font-semibold text-blue-800 mb-2">How Fairness is Calculated</h4>
+                            <div className="text-sm text-blue-700">
+                                <p><strong>Fairness Score = Your Team Rating - Opponent Team Rating</strong></p>
+                                <p className="mt-2">Negative score = harder opponents | Positive score = easier opponents</p>
+                            </div>
+                        </div>
+                        
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b-2 border-gray-200">
+                                        <th className="text-left py-2 px-3">Player</th>
+                                        <th className="text-center py-2 px-3">Total Fairness</th>
+                                        <th className="text-center py-2 px-3">Avg Fairness</th>
+                                        <th className="text-center py-2 px-3">Hardest Round</th>
+                                        <th className="text-center py-2 px-3">Easiest Round</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedPlayers.map((playerData) => (
+                                        <tr key={playerData.player} className="border-b hover:bg-gray-50">
+                                            <td className="py-2 px-3">
+                                                <PlayerBadge playerNum={playerData.player} />
+                                            </td>
+                                            <td className={`text-center py-2 px-3 font-bold ${
+                                                playerData.totalDiff < 0 ? 'text-red-600' : 
+                                                playerData.totalDiff > 0 ? 'text-green-600' : 'text-gray-600'
+                                            }`}>
+                                                {playerData.totalDiff > 0 ? '+' : ''}{playerData.totalDiff.toFixed(2)}
+                                            </td>
+                                            <td className={`text-center py-2 px-3 font-semibold ${
+                                                playerData.avgDiff < 0 ? 'text-red-600' : 
+                                                playerData.avgDiff > 0 ? 'text-green-600' : 'text-gray-600'
+                                            }`}>
+                                                {playerData.avgDiff > 0 ? '+' : ''}{playerData.avgDiff}
+                                            </td>
+                                            <td className="text-center py-2 px-3">
+                                                <span className="text-red-600 font-semibold">
+                                                    R{playerData.hardestRound.round}: {playerData.hardestRound.fairness.toFixed(2)}
+                                                </span>
+                                            </td>
+                                            <td className="text-center py-2 px-3">
+                                                <span className="text-green-600 font-semibold">
+                                                    R{playerData.easiestRound.round}: {playerData.easiestRound.fairness > 0 ? '+' : ''}{playerData.easiestRound.fairness.toFixed(2)}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            }
+
+            function PartnershipsTab() {
+                const partnerships = Array(25).fill(null).map(() => Array(25).fill(0));
+                const opponents = Array(25).fill(null).map(() => Array(25).fill(0));
+
+                fixtures.forEach((round) => {
+                    round.forEach((match) => {
+                        const [p1, p2, p3, p4] = match;
+                        partnerships[p1][p2]++;
+                        partnerships[p2][p1]++;
+                        partnerships[p3][p4]++;
+                        partnerships[p4][p3]++;
+                        [p1, p2].forEach(player1 => {
+                            [p3, p4].forEach(player2 => {
+                                opponents[player1][player2]++;
+                                opponents[player2][player1]++;
+                            });
+                        });
+                    });
+                });
+
+                let totalPartnerships = 0;
+                let uniquePartnerships = 0;
+
+                for (let i = 1; i <= 24; i++) {
+                    for (let j = i + 1; j <= 24; j++) {
+                        if (partnerships[i][j] > 0) {
+                            uniquePartnerships++;
+                            totalPartnerships += partnerships[i][j];
+                        }
+                    }
+                }
+
+                const partnershipCoverage = ((uniquePartnerships / (24 * 23 / 2)) * 100).toFixed(1);
+
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Partnership Analysis</h2>
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-blue-50 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-blue-600">{totalPartnerships}</div>
+                                <div className="text-sm text-blue-700">Total Partnerships</div>
+                            </div>
+                            <div className="bg-green-50 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-green-600">{uniquePartnerships}</div>
+                                <div className="text-sm text-green-700">Unique Partnerships ({partnershipCoverage}%)</div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            function KnockoutTab() {
+                // Calculate standings
+                const playerStats = {};
+                
+                for (let i = 1; i <= 24; i++) {
+                    playerStats[i] = {
+                        matches: 0, points: 0, pointsFor: 0, pointsAgainst: 0
+                    };
+                }
+                
+                fixtures.forEach((round, roundIndex) => {
+                    const roundNum = roundIndex + 1;
+                    round.forEach((match, matchIndex) => {
+                        const matchNum = matchIndex + 1;
+                        const scores = matchScores[roundNum]?.[matchNum];
+                        
+                        if (scores && scores.team1Score !== null && scores.team2Score !== null) {
+                            const [team1p1, team1p2, team2p1, team2p2] = match;
+                            const team1Score = scores.team1Score;
+                            const team2Score = scores.team2Score;
+                            
+                            [team1p1, team1p2, team2p1, team2p2].forEach(player => {
+                                playerStats[player].matches++;
+                            });
+                            
+                            playerStats[team1p1].pointsFor += team1Score;
+                            playerStats[team1p1].pointsAgainst += team2Score;
+                            playerStats[team1p2].pointsFor += team1Score;
+                            playerStats[team1p2].pointsAgainst += team2Score;
+                            playerStats[team2p1].pointsFor += team2Score;
+                            playerStats[team2p1].pointsAgainst += team1Score;
+                            playerStats[team2p2].pointsFor += team2Score;
+                            playerStats[team2p2].pointsAgainst += team1Score;
+                            
+                            if (team1Score > team2Score) {
+                                playerStats[team1p1].points += 3;
+                                playerStats[team1p2].points += 3;
+                            } else if (team2Score > team1Score) {
+                                playerStats[team2p1].points += 3;
+                                playerStats[team2p2].points += 3;
+                            } else {
+                                playerStats[team1p1].points += 1;
+                                playerStats[team1p2].points += 1;
+                                playerStats[team2p1].points += 1;
+                                playerStats[team2p2].points += 1;
+                            }
+                        }
+                    });
+                });
+                
+                const sortedPlayers = Object.entries(playerStats)
+                    .map(([player, stats]) => ({
+                        player: parseInt(player), ...stats,
+                        pointsDiff: stats.pointsFor - stats.pointsAgainst
+                    }))
+                    .sort((a, b) => {
+                        if (b.points !== a.points) return b.points - a.points;
+                        if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
+                        return b.pointsFor - a.pointsFor;
+                    });
+                
+                const qualifiedPlayers = sortedPlayers.slice(0, 12).map(p => p.player);
+                
+                if (qualifiedPlayers.length < 12) {
+                    return (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4">Knockout Stage</h2>
+                            <div className="text-center py-12">
+                                <div className="text-gray-400 text-6xl mb-4">🏆</div>
+                                <h3 className="text-lg font-semibold text-gray-600 mb-2">Complete the Round Robin Stage First</h3>
+                                <p className="text-gray-500">Top 12 players will qualify for the playoffs!</p>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🏆 Knockout Stage - Top 12 Players</h2>
+                        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                            {qualifiedPlayers.map((player, index) => (
+                                <div key={player} className="text-center p-2 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-300">
+                                    <div className="text-xs font-bold text-yellow-700 mb-1">#{index + 1}</div>
+                                    <PlayerBadge playerNum={player} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
+
             return (
                 <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4">
                     {showSaveIndicator && (
@@ -443,7 +841,7 @@
                                         activeTab === 'tournament' ? 'bg-blue-500 text-white rounded-tl-lg' : 'text-gray-600 hover:text-blue-500'
                                     }`}
                                 >
-                                    🏆 Fixtures
+                                    🏆 Tournament
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('players')}
@@ -456,10 +854,42 @@
                                 <button
                                     onClick={() => setActiveTab('data')}
                                     className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'data' ? 'bg-blue-500 text-white rounded-tr-lg' : 'text-gray-600 hover:text-blue-500'
+                                        activeTab === 'data' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
                                     }`}
                                 >
                                     💾 Data
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('results')}
+                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
+                                        activeTab === 'results' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
+                                    }`}
+                                >
+                                    📊 Results
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('fairness')}
+                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
+                                        activeTab === 'fairness' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
+                                    }`}
+                                >
+                                    ⚖️ Fairness
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('partnerships')}
+                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
+                                        activeTab === 'partnerships' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
+                                    }`}
+                                >
+                                    🤝 Partnerships
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('knockout')}
+                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
+                                        activeTab === 'knockout' ? 'bg-blue-500 text-white rounded-tr-lg' : 'text-gray-600 hover:text-blue-500'
+                                    }`}
+                                >
+                                    🏆 Knockout
                                 </button>
                             </div>
                         </div>
@@ -582,7 +1012,7 @@
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
                                             <h3 className="text-lg font-semibold text-blue-800 mb-2">💾 Export Backup</h3>
-                                            <p className="text-sm text-blue-700 mb-4">Download all data as a JSON file for safekeeping or transferring to another device.</p>
+                                            <p className="text-sm text-blue-700 mb-4">Download all data as a JSON file.</p>
                                             <button
                                                 onClick={exportData}
                                                 className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-semibold"
@@ -593,7 +1023,7 @@
                                         
                                         <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
                                             <h3 className="text-lg font-semibold text-purple-800 mb-2">📂 Import Data</h3>
-                                            <p className="text-sm text-purple-700 mb-4">Upload a previously exported JSON file to restore your tournament.</p>
+                                            <p className="text-sm text-purple-700 mb-4">Upload a previously exported JSON file.</p>
                                             <label className="w-full block">
                                                 <input
                                                     type="file"
@@ -609,7 +1039,7 @@
                                         
                                         <div className="border-2 border-orange-200 rounded-lg p-4 bg-orange-50">
                                             <h3 className="text-lg font-semibold text-orange-800 mb-2">⚠️ Reset Scores</h3>
-                                            <p className="text-sm text-orange-700 mb-4">Clear all match scores while keeping player names and ratings.</p>
+                                            <p className="text-sm text-orange-700 mb-4">Clear all match scores.</p>
                                             <button
                                                 onClick={resetAllScores}
                                                 className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 font-semibold"
@@ -620,7 +1050,7 @@
                                         
                                         <div className="border-2 border-red-200 rounded-lg p-4 bg-red-50">
                                             <h3 className="text-lg font-semibold text-red-800 mb-2">🗑️ Clear All Data</h3>
-                                            <p className="text-sm text-red-700 mb-4">Remove everything from device storage and start fresh.</p>
+                                            <p className="text-sm text-red-700 mb-4">Remove everything from device storage.</p>
                                             <button
                                                 onClick={clearAllData}
                                                 className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-semibold"
@@ -689,6 +1119,11 @@
                                 </div>
                             </div>
                         )}
+
+                        {activeTab === 'results' && <ResultsTab />}
+                        {activeTab === 'fairness' && <FairnessTab />}
+                        {activeTab === 'partnerships' && <PartnershipsTab />}
+                        {activeTab === 'knockout' && <KnockoutTab />}
                     </div>
                 </div>
             );
