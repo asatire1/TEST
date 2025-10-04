@@ -8,40 +8,17 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { margin: 0; padding: 0; }
-        .auto-save-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 1000;
-            animation: fadeIn 0.3s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
 </head>
 <body>
     <div id="root"></div>
-
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState } = React;
 
         function PadelTournamentApp() {
             const [selectedRound, setSelectedRound] = useState(1);
             const [activeTab, setActiveTab] = useState('tournament');
             const [filterRound, setFilterRound] = useState('all');
             const [filterPlayer, setFilterPlayer] = useState('all');
-            const [showSaveIndicator, setShowSaveIndicator] = useState(false);
             const [knockoutScores, setKnockoutScores] = useState({
                 qf1: { team1Score: null, team2Score: null },
                 qf2: { team1Score: null, team2Score: null },
@@ -54,29 +31,19 @@
             const [knockoutMaxScore, setKnockoutMaxScore] = useState(16);
             const [finalMaxScore, setFinalMaxScore] = useState(16);
             
-            // Initialize state from localStorage
-            const [playerNames, setPlayerNames] = useState(() => {
-                const saved = localStorage.getItem('padelPlayerNames');
-                return saved ? JSON.parse(saved) : [
-                    'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8',
-                    'Player 9', 'Player 10', 'Player 11', 'Player 12', 'Player 13', 'Player 14', 'Player 15', 'Player 16',
-                    'Player 17', 'Player 18', 'Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'
-                ];
-            });
+            const [playerNames, setPlayerNames] = useState([
+                'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8',
+                'Player 9', 'Player 10', 'Player 11', 'Player 12', 'Player 13', 'Player 14', 'Player 15', 'Player 16',
+                'Player 17', 'Player 18', 'Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'
+            ]);
             
-            const [skillRatings, setSkillRatings] = useState(() => {
-                const saved = localStorage.getItem('padelSkillRatings');
-                return saved ? JSON.parse(saved) : {
-                    1: 3.85, 2: 3.75, 3: 3.7, 4: 3.6, 5: 3.55, 6: 3.4, 7: 3.4, 8: 3.3,
-                    9: 3.2, 10: 3.15, 11: 3.1, 12: 3.1, 13: 3.0, 14: 2.95, 15: 2.95, 16: 2.9,
-                    17: 2.85, 18: 2.85, 19: 2.75, 20: 2.7, 21: 2.6, 22: 2.55, 23: 2.55, 24: 2.45
-                };
+            const [skillRatings, setSkillRatings] = useState({
+                1: 3.85, 2: 3.75, 3: 3.7, 4: 3.6, 5: 3.55, 6: 3.4, 7: 3.4, 8: 3.3,
+                9: 3.2, 10: 3.15, 11: 3.1, 12: 3.1, 13: 3.0, 14: 2.95, 15: 2.95, 16: 2.9,
+                17: 2.85, 18: 2.85, 19: 2.75, 20: 2.7, 21: 2.6, 22: 2.55, 23: 2.55, 24: 2.45
             });
             
             const [matchScores, setMatchScores] = useState(() => {
-                const saved = localStorage.getItem('padelMatchScores');
-                if (saved) return JSON.parse(saved);
-                
                 const initialScores = {};
                 for (let round = 1; round <= 13; round++) {
                     initialScores[round] = {};
@@ -86,127 +53,6 @@
                 }
                 return initialScores;
             });
-
-            // Auto-save to localStorage whenever data changes
-            useEffect(() => {
-                localStorage.setItem('padelPlayerNames', JSON.stringify(playerNames));
-                showAutoSaveIndicator();
-            }, [playerNames]);
-
-            useEffect(() => {
-                localStorage.setItem('padelSkillRatings', JSON.stringify(skillRatings));
-                showAutoSaveIndicator();
-            }, [skillRatings]);
-
-            useEffect(() => {
-                localStorage.setItem('padelMatchScores', JSON.stringify(matchScores));
-                showAutoSaveIndicator();
-            }, [matchScores]);
-
-            useEffect(() => {
-                localStorage.setItem('padelKnockoutScores', JSON.stringify(knockoutScores));
-                showAutoSaveIndicator();
-            }, [knockoutScores]);
-
-            useEffect(() => {
-                localStorage.setItem('padelKnockoutMaxScore', knockoutMaxScore.toString());
-            }, [knockoutMaxScore]);
-
-            useEffect(() => {
-                localStorage.setItem('padelFinalMaxScore', finalMaxScore.toString());
-            }, [finalMaxScore]);
-
-            // Load knockout scores on mount
-            useEffect(() => {
-                const savedKnockout = localStorage.getItem('padelKnockoutScores');
-                if (savedKnockout) setKnockoutScores(JSON.parse(savedKnockout));
-                
-                const savedKnockoutMax = localStorage.getItem('padelKnockoutMaxScore');
-                if (savedKnockoutMax) setKnockoutMaxScore(parseInt(savedKnockoutMax));
-                
-                const savedFinalMax = localStorage.getItem('padelFinalMaxScore');
-                if (savedFinalMax) setFinalMaxScore(parseInt(savedFinalMax));
-            }, []);
-
-            const showAutoSaveIndicator = () => {
-                setShowSaveIndicator(true);
-                setTimeout(() => setShowSaveIndicator(false), 2000);
-            };
-
-            const resetAllScores = () => {
-                if (!confirm('Are you sure you want to reset all scores? This will clear all match results.')) return;
-                
-                const emptyScores = {};
-                for (let round = 1; round <= 13; round++) {
-                    emptyScores[round] = {};
-                    for (let match = 1; match <= 6; match++) {
-                        emptyScores[round][match] = { team1Score: null, team2Score: null };
-                    }
-                }
-                setMatchScores(emptyScores);
-                alert('All scores have been reset!');
-            };
-
-            const exportData = () => {
-                const exportData = {
-                    playerNames,
-                    skillRatings,
-                    matchScores,
-                    knockoutScores,
-                    knockoutMaxScore,
-                    finalMaxScore,
-                    exportDate: new Date().toISOString()
-                };
-                
-                const dataStr = JSON.stringify(exportData, null, 2);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `padel-tournament-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            };
-
-            const importData = (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const importedData = JSON.parse(e.target.result);
-                        
-                        if (importedData.playerNames) setPlayerNames(importedData.playerNames);
-                        if (importedData.skillRatings) setSkillRatings(importedData.skillRatings);
-                        if (importedData.matchScores) setMatchScores(importedData.matchScores);
-                        if (importedData.knockoutScores) setKnockoutScores(importedData.knockoutScores);
-                        if (importedData.knockoutMaxScore) setKnockoutMaxScore(importedData.knockoutMaxScore);
-                        if (importedData.finalMaxScore) setFinalMaxScore(importedData.finalMaxScore);
-                        
-                        alert('Tournament data imported successfully!');
-                    } catch (error) {
-                        alert('Error importing data. Please make sure the file is valid.');
-                    }
-                };
-                reader.readAsText(file);
-                event.target.value = '';
-            };
-
-            const clearAllData = () => {
-                if (!confirm('Are you sure you want to clear ALL data? This will remove everything from your device storage.')) return;
-                
-                localStorage.removeItem('padelPlayerNames');
-                localStorage.removeItem('padelSkillRatings');
-                localStorage.removeItem('padelMatchScores');
-                localStorage.removeItem('padelKnockoutScores');
-                localStorage.removeItem('padelKnockoutMaxScore');
-                localStorage.removeItem('padelFinalMaxScore');
-                
-                window.location.reload();
-            };
 
             const fixtures = [
                 [[1,4,2,3], [5,8,6,7], [9,12,10,11], [13,16,14,15], [17,20,18,19], [21,24,22,23]],
@@ -224,34 +70,6 @@
                 [[2,8,5,4], [3,7,6,1], [10,24,21,12], [9,23,15,11], [14,20,17,16], [13,19,18,22]]
             ];
 
-            const getFilteredMatches = () => {
-                let filteredMatches = [];
-                const roundsToShow = filterRound === 'all' 
-                    ? Array.from({ length: 13 }, (_, i) => i + 1)
-                    : [parseInt(filterRound)];
-                
-                roundsToShow.forEach(roundNum => {
-                    if (fixtures[roundNum - 1]) {
-                        fixtures[roundNum - 1].forEach((match, matchIndex) => {
-                            const [p1, p2, p3, p4] = match;
-                            if (filterPlayer === 'all' || [p1, p2, p3, p4].includes(parseInt(filterPlayer))) {
-                                filteredMatches.push({
-                                    round: roundNum,
-                                    matchIndex: matchIndex,
-                                    match: match
-                                });
-                            }
-                        });
-                    }
-                });
-                return filteredMatches;
-            };
-
-            const clearFilters = () => {
-                setFilterRound('all');
-                setFilterPlayer('all');
-            };
-
             const handleScoreChange = (round, match, team, value) => {
                 const score = parseInt(value) || null;
                 if (score !== null && (score < 0 || score > 16)) return;
@@ -267,16 +85,6 @@
                     } else {
                         newScores[round][match].team2Score = score;
                         newScores[round][match].team1Score = score !== null ? 16 - score : null;
-                    }
-                    return newScores;
-                });
-            };
-
-            const clearMatchScore = (round, match) => {
-                setMatchScores(prev => {
-                    const newScores = { ...prev };
-                    if (newScores[round] && newScores[round][match]) {
-                        newScores[round][match] = { team1Score: null, team2Score: null };
                     }
                     return newScores;
                 });
@@ -302,13 +110,6 @@
                 });
             };
 
-            const clearKnockoutScore = (match) => {
-                setKnockoutScores(prev => ({
-                    ...prev,
-                    [match]: { team1Score: null, team2Score: null }
-                }));
-            };
-
             const getTierColor = (playerNum) => {
                 const tierColors = ['#DC2626', '#EA580C', '#CA8A04', '#16A34A', '#2563EB', '#7C3AED'];
                 const tierIndex = Math.floor((playerNum - 1) / 4);
@@ -321,119 +122,68 @@
                 return tierNames[tierIndex] || 'Unranked';
             };
 
-            function PlayerBadge({ playerNum, isPartnership = false }) {
+            function PlayerBadge({ playerNum }) {
                 return (
-                    <div className={`${isPartnership ? 'mr-1' : 'mx-1'} transition-all duration-200 hover:shadow-lg`}>
-                        <span 
-                            className="inline-block px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold"
-                            style={{ backgroundColor: getTierColor(playerNum), color: 'white' }}
-                            title={`Rank ${playerNum} - ${getTierName(playerNum)} - Rating: ${skillRatings[playerNum]}`}
-                        >
-                            {playerNames[playerNum - 1]}
-                        </span>
-                    </div>
+                    <span 
+                        className="inline-block px-2 py-1 rounded-full text-xs font-bold mx-1"
+                        style={{ backgroundColor: getTierColor(playerNum), color: 'white' }}
+                        title={`${getTierName(playerNum)} - Rating: ${skillRatings[playerNum]}`}
+                    >
+                        {playerNames[playerNum - 1]}
+                    </span>
                 );
             }
 
             function MatchDisplay({ match, matchIndex }) {
                 const [team1Player1, team1Player2, team2Player1, team2Player2] = match;
-                const getGroup = (player) => Math.ceil(player / 4);
-                const team1Groups = [getGroup(team1Player1), getGroup(team1Player2)];
-                const team2Groups = [getGroup(team2Player1), getGroup(team2Player2)];
-                const isIntraGroup = team1Groups[0] === team1Groups[1] && team2Groups[0] === team2Groups[1];
-                const matchType = isIntraGroup ? 'Within Group' : 'Cross Group';
-                const borderColor = isIntraGroup ? 'border-purple-500' : 'border-green-500';
-                
                 const currentRound = filterRound !== 'all' ? parseInt(filterRound) : selectedRound;
                 const currentScores = matchScores[currentRound]?.[matchIndex + 1] || { team1Score: null, team2Score: null };
                 const isMatchComplete = currentScores.team1Score !== null && currentScores.team2Score !== null;
                 
-                const team1Rating = (skillRatings[team1Player1] + skillRatings[team1Player2]).toFixed(2);
-                const team2Rating = (skillRatings[team2Player1] + skillRatings[team2Player2]).toFixed(2);
-                
                 return (
-                    <div className={`bg-white rounded-lg shadow-md p-3 border-l-4 ${borderColor} hover:shadow-lg transition-shadow duration-200 ${isMatchComplete ? 'bg-green-50' : ''} w-full`}>
-                        <div className="flex justify-between items-start mb-3">
-                            <div className="font-semibold text-gray-700 text-sm">Match {matchIndex + 1}</div>
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                                <span className={`text-xs px-2 py-1 rounded-full ${isIntraGroup ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
-                                    <span className="hidden sm:inline">{matchType}</span>
-                                    <span className="sm:hidden">{isIntraGroup ? 'WG' : 'CG'}</span>
-                                </span>
-                                {isMatchComplete && (
-                                    <span className="text-xs px-2 py-1 rounded-full bg-green-200 text-green-800">
-                                        <span className="hidden sm:inline">Complete</span>
-                                        <span className="sm:hidden">✓</span>
-                                    </span>
-                                )}
-                            </div>
+                    <div className={`bg-white rounded-lg shadow-md p-3 border-l-4 border-blue-500 ${isMatchComplete ? 'bg-green-50' : ''}`}>
+                        <div className="font-semibold text-gray-700 text-sm mb-2">Match {matchIndex + 1}</div>
+                        
+                        <div className="mb-2">
+                            <PlayerBadge playerNum={team1Player1} />
+                            <PlayerBadge playerNum={team1Player2} />
                         </div>
                         
-                        <div className="mb-3">
-                            <div className="flex flex-wrap items-center gap-1 mb-1">
-                                <PlayerBadge playerNum={team1Player1} isPartnership={true} />
-                                <PlayerBadge playerNum={team1Player2} isPartnership={true} />
-                            </div>
-                            <div className="text-xs text-gray-500">
-                                Groups: {team1Groups.join(', ')} | Total: {team1Rating}
-                            </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-center gap-2 mb-3">
+                        <div className="flex items-center justify-center gap-2 my-2">
                             <input
                                 type="number"
                                 min="0"
                                 max="16"
                                 value={currentScores.team1Score || ''}
                                 onChange={(e) => handleScoreChange(currentRound, matchIndex + 1, 'team1', e.target.value)}
-                                className="w-12 h-8 sm:w-14 sm:h-10 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-14 h-10 text-center border border-gray-300 rounded"
                                 placeholder="0"
                             />
-                            <span className="text-lg font-bold text-gray-600">-</span>
+                            <span className="text-lg font-bold">-</span>
                             <input
                                 type="number"
                                 min="0"
                                 max="16"
                                 value={currentScores.team2Score || ''}
                                 onChange={(e) => handleScoreChange(currentRound, matchIndex + 1, 'team2', e.target.value)}
-                                className="w-12 h-8 sm:w-14 sm:h-10 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-14 h-10 text-center border border-gray-300 rounded"
                                 placeholder="0"
                             />
-                            {isMatchComplete && (
-                                <button
-                                    onClick={() => clearMatchScore(currentRound, matchIndex + 1)}
-                                    className="ml-1 text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-600 flex-shrink-0"
-                                    title="Clear score"
-                                >
-                                    ✕
-                                </button>
-                            )}
                         </div>
                         
-                        <div className="mb-3">
-                            <div className="flex flex-wrap items-center gap-1 mb-1">
-                                <PlayerBadge playerNum={team2Player1} isPartnership={true} />
-                                <PlayerBadge playerNum={team2Player2} isPartnership={true} />
-                            </div>
-                            <div className="text-xs text-gray-500">
-                                Groups: {team2Groups.join(', ')} | Total: {team2Rating}
-                            </div>
+                        <div className="mb-2">
+                            <PlayerBadge playerNum={team2Player1} />
+                            <PlayerBadge playerNum={team2Player2} />
                         </div>
-                        
+
                         {isMatchComplete && (
                             <div className="text-center text-sm">
                                 {currentScores.team1Score > currentScores.team2Score ? (
-                                    <span className="text-green-600 font-semibold">
-                                        🏆 <span className="hidden sm:inline">{playerNames[team1Player1 - 1]} & {playerNames[team1Player2 - 1]} Win!</span>
-                                        <span className="sm:hidden">Team 1 Wins!</span>
-                                    </span>
+                                    <span className="text-green-600 font-semibold">🏆 Team 1 Wins!</span>
                                 ) : currentScores.team2Score > currentScores.team1Score ? (
-                                    <span className="text-green-600 font-semibold">
-                                        🏆 <span className="hidden sm:inline">{playerNames[team2Player1 - 1]} & {playerNames[team2Player2 - 1]} Win!</span>
-                                        <span className="sm:hidden">Team 2 Wins!</span>
-                                    </span>
+                                    <span className="text-green-600 font-semibold">🏆 Team 2 Wins!</span>
                                 ) : (
-                                    <span className="text-blue-600 font-semibold">🤝 Tie Game!</span>
+                                    <span className="text-blue-600 font-semibold">🤝 Tie!</span>
                                 )}
                             </div>
                         )}
@@ -465,38 +215,24 @@
                                 playerStats[player].matches++;
                             });
                             
-                            playerStats[team1p1].pointsFor += team1Score;
-                            playerStats[team1p1].pointsAgainst += team2Score;
-                            playerStats[team1p2].pointsFor += team1Score;
-                            playerStats[team1p2].pointsAgainst += team2Score;
-                            playerStats[team2p1].pointsFor += team2Score;
-                            playerStats[team2p1].pointsAgainst += team1Score;
-                            playerStats[team2p2].pointsFor += team2Score;
-                            playerStats[team2p2].pointsAgainst += team1Score;
+                            [team1p1, team1p2].forEach(player => {
+                                playerStats[player].pointsFor += team1Score;
+                                playerStats[player].pointsAgainst += team2Score;
+                            });
+                            
+                            [team2p1, team2p2].forEach(player => {
+                                playerStats[player].pointsFor += team2Score;
+                                playerStats[player].pointsAgainst += team1Score;
+                            });
                             
                             if (team1Score > team2Score) {
-                                playerStats[team1p1].wins++;
-                                playerStats[team1p2].wins++;
-                                playerStats[team2p1].losses++;
-                                playerStats[team2p2].losses++;
-                                playerStats[team1p1].points += 3;
-                                playerStats[team1p2].points += 3;
+                                [team1p1, team1p2].forEach(p => { playerStats[p].wins++; playerStats[p].points += 3; });
+                                [team2p1, team2p2].forEach(p => playerStats[p].losses++);
                             } else if (team2Score > team1Score) {
-                                playerStats[team2p1].wins++;
-                                playerStats[team2p2].wins++;
-                                playerStats[team1p1].losses++;
-                                playerStats[team1p2].losses++;
-                                playerStats[team2p1].points += 3;
-                                playerStats[team2p2].points += 3;
+                                [team2p1, team2p2].forEach(p => { playerStats[p].wins++; playerStats[p].points += 3; });
+                                [team1p1, team1p2].forEach(p => playerStats[p].losses++);
                             } else {
-                                playerStats[team1p1].draws++;
-                                playerStats[team1p2].draws++;
-                                playerStats[team2p1].draws++;
-                                playerStats[team2p2].draws++;
-                                playerStats[team1p1].points += 1;
-                                playerStats[team1p2].points += 1;
-                                playerStats[team2p1].points += 1;
-                                playerStats[team2p2].points += 1;
+                                [team1p1, team1p2, team2p1, team2p2].forEach(p => { playerStats[p].draws++; playerStats[p].points += 1; });
                             }
                         }
                     });
@@ -505,7 +241,6 @@
                 const sortedPlayers = Object.entries(playerStats)
                     .map(([player, stats]) => ({
                         player: parseInt(player), ...stats,
-                        winRate: stats.matches > 0 ? (stats.wins / stats.matches * 100).toFixed(1) : '0.0',
                         pointsDiff: stats.pointsFor - stats.pointsAgainst
                     }))
                     .sort((a, b) => {
@@ -520,45 +255,29 @@
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b-2 border-gray-200">
-                                        <th className="text-left py-2 px-3">Rank</th>
-                                        <th className="text-left py-2 px-3">Player</th>
-                                        <th className="text-center py-2 px-3">Points</th>
-                                        <th className="text-center py-2 px-3">Matches</th>
-                                        <th className="text-center py-2 px-3">Wins</th>
-                                        <th className="text-center py-2 px-3">Draws</th>
-                                        <th className="text-center py-2 px-3">Losses</th>
-                                        <th className="text-center py-2 px-3">Win Rate</th>
-                                        <th className="text-center py-2 px-3">For</th>
-                                        <th className="text-center py-2 px-3">Against</th>
-                                        <th className="text-center py-2 px-3">Diff</th>
+                                    <tr className="border-b-2">
+                                        <th className="text-left py-2 px-2">Rank</th>
+                                        <th className="text-left py-2 px-2">Player</th>
+                                        <th className="text-center py-2 px-2">Pts</th>
+                                        <th className="text-center py-2 px-2">W</th>
+                                        <th className="text-center py-2 px-2">D</th>
+                                        <th className="text-center py-2 px-2">L</th>
+                                        <th className="text-center py-2 px-2">Diff</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {sortedPlayers.map((playerData, index) => (
-                                        <tr key={playerData.player} className={`border-b ${index < 3 ? 'bg-yellow-50' : ''}`}>
-                                            <td className="py-2 px-3 font-semibold">
-                                                {index + 1}
-                                                {index === 0 && ' 🥇'}
-                                                {index === 1 && ' 🥈'}
-                                                {index === 2 && ' 🥉'}
+                                    {sortedPlayers.map((p, idx) => (
+                                        <tr key={p.player} className={`border-b ${idx < 3 ? 'bg-yellow-50' : ''}`}>
+                                            <td className="py-2 px-2 font-semibold">
+                                                {idx + 1}{idx === 0 && ' 🥇'}{idx === 1 && ' 🥈'}{idx === 2 && ' 🥉'}
                                             </td>
-                                            <td className="py-2 px-3">
-                                                <PlayerBadge playerNum={playerData.player} />
-                                            </td>
-                                            <td className="text-center py-2 px-3 font-bold text-lg text-blue-600">{playerData.points}</td>
-                                            <td className="text-center py-2 px-3">{playerData.matches}</td>
-                                            <td className="text-center py-2 px-3 text-green-600 font-semibold">{playerData.wins}</td>
-                                            <td className="text-center py-2 px-3 text-yellow-600">{playerData.draws}</td>
-                                            <td className="text-center py-2 px-3 text-red-600">{playerData.losses}</td>
-                                            <td className="text-center py-2 px-3">{playerData.winRate}%</td>
-                                            <td className="text-center py-2 px-3">{playerData.pointsFor}</td>
-                                            <td className="text-center py-2 px-3">{playerData.pointsAgainst}</td>
-                                            <td className={`text-center py-2 px-3 font-semibold ${
-                                                playerData.pointsDiff > 0 ? 'text-green-600' : 
-                                                playerData.pointsDiff < 0 ? 'text-red-600' : 'text-gray-600'
-                                            }`}>
-                                                {playerData.pointsDiff > 0 ? '+' : ''}{playerData.pointsDiff}
+                                            <td className="py-2 px-2"><PlayerBadge playerNum={p.player} /></td>
+                                            <td className="text-center py-2 px-2 font-bold text-blue-600">{p.points}</td>
+                                            <td className="text-center py-2 px-2 text-green-600">{p.wins}</td>
+                                            <td className="text-center py-2 px-2 text-yellow-600">{p.draws}</td>
+                                            <td className="text-center py-2 px-2 text-red-600">{p.losses}</td>
+                                            <td className={`text-center py-2 px-2 font-semibold ${p.pointsDiff > 0 ? 'text-green-600' : p.pointsDiff < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                                                {p.pointsDiff > 0 ? '+' : ''}{p.pointsDiff}
                                             </td>
                                         </tr>
                                     ))}
@@ -573,45 +292,26 @@
                 const playerFairness = {};
                 
                 for (let i = 1; i <= 24; i++) {
-                    playerFairness[i] = {
-                        rounds: [],
-                        totalDiff: 0,
-                        avgDiff: 0,
-                        hardestRound: null,
-                        easiestRound: null
-                    };
+                    playerFairness[i] = { totalDiff: 0, rounds: [] };
                 }
                 
                 fixtures.forEach((round, roundIndex) => {
-                    const roundNum = roundIndex + 1;
                     round.forEach((match) => {
-                        const [team1p1, team1p2, team2p1, team2p2] = match;
+                        const [t1p1, t1p2, t2p1, t2p2] = match;
+                        const t1Rating = skillRatings[t1p1] + skillRatings[t1p2];
+                        const t2Rating = skillRatings[t2p1] + skillRatings[t2p2];
+                        const t1Fair = parseFloat((t1Rating - t2Rating).toFixed(2));
+                        const t2Fair = parseFloat((t2Rating - t1Rating).toFixed(2));
                         
-                        const team1Rating = skillRatings[team1p1] + skillRatings[team1p2];
-                        const team2Rating = skillRatings[team2p1] + skillRatings[team2p2];
-                        
-                        const team1Fairness = (team1Rating - team2Rating).toFixed(2);
-                        const team2Fairness = (team2Rating - team1Rating).toFixed(2);
-                        
-                        playerFairness[team1p1].rounds.push({ round: roundNum, fairness: parseFloat(team1Fairness) });
-                        playerFairness[team1p2].rounds.push({ round: roundNum, fairness: parseFloat(team1Fairness) });
-                        playerFairness[team2p1].rounds.push({ round: roundNum, fairness: parseFloat(team2Fairness) });
-                        playerFairness[team2p2].rounds.push({ round: roundNum, fairness: parseFloat(team2Fairness) });
-                        
-                        playerFairness[team1p1].totalDiff += parseFloat(team1Fairness);
-                        playerFairness[team1p2].totalDiff += parseFloat(team1Fairness);
-                        playerFairness[team2p1].totalDiff += parseFloat(team2Fairness);
-                        playerFairness[team2p2].totalDiff += parseFloat(team2Fairness);
+                        [t1p1, t1p2].forEach(p => {
+                            playerFairness[p].totalDiff += t1Fair;
+                            playerFairness[p].rounds.push(t1Fair);
+                        });
+                        [t2p1, t2p2].forEach(p => {
+                            playerFairness[p].totalDiff += t2Fair;
+                            playerFairness[p].rounds.push(t2Fair);
+                        });
                     });
-                });
-                
-                Object.keys(playerFairness).forEach(player => {
-                    const data = playerFairness[player];
-                    data.avgDiff = (data.totalDiff / data.rounds.length).toFixed(2);
-                    
-                    const sortedRounds = [...data.rounds].sort((a, b) => a.fairness - b.fairness);
-                    data.hardestRound = sortedRounds[0];
-                    data.easiestRound = sortedRounds[sortedRounds.length - 1];
                 });
                 
                 const sortedPlayers = Object.entries(playerFairness)
@@ -620,53 +320,74 @@
                 
                 return (
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Fairness Analysis</h2>
-                        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                            <h4 className="font-semibold text-blue-800 mb-2">How Fairness is Calculated</h4>
-                            <div className="text-sm text-blue-700">
-                                <p><strong>Fairness Score = Your Team Rating - Opponent Team Rating</strong></p>
-                                <p className="mt-2">Negative score = harder opponents | Positive score = easier opponents</p>
-                            </div>
-                        </div>
-                        
+                        <h2 className="text-2xl font-bold mb-4">Fairness Analysis</h2>
+                        <p className="text-sm mb-4">Negative = harder opponents | Positive = easier opponents</p>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b-2 border-gray-200">
-                                        <th className="text-left py-2 px-3">Player</th>
-                                        <th className="text-center py-2 px-3">Total Fairness</th>
-                                        <th className="text-center py-2 px-3">Avg Fairness</th>
-                                        <th className="text-center py-2 px-3">Hardest Round</th>
-                                        <th className="text-center py-2 px-3">Easiest Round</th>
+                                    <tr className="border-b-2">
+                                        <th className="text-left py-2 px-2">Player</th>
+                                        <th className="text-center py-2 px-2">Total Fairness</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {sortedPlayers.map((playerData) => (
-                                        <tr key={playerData.player} className="border-b hover:bg-gray-50">
-                                            <td className="py-2 px-3">
-                                                <PlayerBadge playerNum={playerData.player} />
+                                    {sortedPlayers.map(p => (
+                                        <tr key={p.player} className="border-b">
+                                            <td className="py-2 px-2"><PlayerBadge playerNum={p.player} /></td>
+                                            <td className={`text-center py-2 px-2 font-bold ${p.totalDiff < 0 ? 'text-red-600' : p.totalDiff > 0 ? 'text-green-600' : 'text-gray-600'}`}>
+                                                {p.totalDiff > 0 ? '+' : ''}{p.totalDiff.toFixed(2)}
                                             </td>
-                                            <td className={`text-center py-2 px-3 font-bold ${
-                                                playerData.totalDiff < 0 ? 'text-red-600' : 
-                                                playerData.totalDiff > 0 ? 'text-green-600' : 'text-gray-600'
-                                            }`}>
-                                                {playerData.totalDiff > 0 ? '+' : ''}{playerData.totalDiff.toFixed(2)}
-                                            </td>
-                                            <td className={`text-center py-2 px-3 font-semibold ${
-                                                playerData.avgDiff < 0 ? 'text-red-600' : 
-                                                playerData.avgDiff > 0 ? 'text-green-600' : 'text-gray-600'
-                                            }`}>
-                                                {playerData.avgDiff > 0 ? '+' : ''}{playerData.avgDiff}
-                                            </td>
-                                            <td className="text-center py-2 px-3">
-                                                <span className="text-red-600 font-semibold">
-                                                    R{playerData.hardestRound.round}: {playerData.hardestRound.fairness.toFixed(2)}
-                                                </span>
-                                            </td>
-                                            <td className="text-center py-2 px-3">
-                                                <span className="text-green-600 font-semibold">
-                                                    R{playerData.easiestRound.round}: {playerData.easiestRound.fairness > 0 ? '+' : ''}{playerData.easiestRound.fairness.toFixed(2)}
-                                                </span>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            }
+
+            function Fairness2Tab() {
+                const playerFairness = {};
+                
+                for (let i = 1; i <= 24; i++) {
+                    playerFairness[i] = { totalDiff: 0 };
+                }
+                
+                fixtures.forEach((round) => {
+                    round.forEach((match) => {
+                        const [t1p1, t1p2, t2p1, t2p2] = match;
+                        const avgOpp1 = (skillRatings[t2p1] + skillRatings[t2p2]) / 2;
+                        const avgOpp2 = (skillRatings[t1p1] + skillRatings[t1p2]) / 2;
+                        
+                        playerFairness[t1p1].totalDiff += skillRatings[t1p2] - avgOpp1;
+                        playerFairness[t1p2].totalDiff += skillRatings[t1p1] - avgOpp1;
+                        playerFairness[t2p1].totalDiff += skillRatings[t2p2] - avgOpp2;
+                        playerFairness[t2p2].totalDiff += skillRatings[t2p1] - avgOpp2;
+                    });
+                });
+                
+                const sortedPlayers = Object.entries(playerFairness)
+                    .map(([player, data]) => ({ player: parseInt(player), ...data }))
+                    .sort((a, b) => a.totalDiff - b.totalDiff);
+                
+                return (
+                    <div className="bg-white rounded-lg shadow-md p-6">
+                        <h2 className="text-2xl font-bold mb-4">Fairness 2: Partner vs Opponents</h2>
+                        <p className="text-sm mb-4">Partner Rating - Avg Opponent Rating</p>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b-2">
+                                        <th className="text-left py-2 px-2">Player</th>
+                                        <th className="text-center py-2 px-2">Total Fairness</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedPlayers.map(p => (
+                                        <tr key={p.player} className="border-b">
+                                            <td className="py-2 px-2"><PlayerBadge playerNum={p.player} /></td>
+                                            <td className={`text-center py-2 px-2 font-bold ${p.totalDiff < 0 ? 'text-red-600' : p.totalDiff > 0 ? 'text-green-600' : 'text-gray-600'}`}>
+                                                {p.totalDiff > 0 ? '+' : ''}{p.totalDiff.toFixed(2)}
                                             </td>
                                         </tr>
                                     ))}
@@ -679,7 +400,6 @@
 
             function PartnershipsTab() {
                 const partnerships = Array(25).fill(null).map(() => Array(25).fill(0));
-                const opponents = Array(25).fill(null).map(() => Array(25).fill(0));
 
                 fixtures.forEach((round) => {
                     round.forEach((match) => {
@@ -688,54 +408,42 @@
                         partnerships[p2][p1]++;
                         partnerships[p3][p4]++;
                         partnerships[p4][p3]++;
-                        [p1, p2].forEach(player1 => {
-                            [p3, p4].forEach(player2 => {
-                                opponents[player1][player2]++;
-                                opponents[player2][player1]++;
-                            });
-                        });
                     });
                 });
 
-                let totalPartnerships = 0;
                 let uniquePartnerships = 0;
-
                 for (let i = 1; i <= 24; i++) {
                     for (let j = i + 1; j <= 24; j++) {
-                        if (partnerships[i][j] > 0) {
-                            uniquePartnerships++;
-                            totalPartnerships += partnerships[i][j];
-                        }
+                        if (partnerships[i][j] > 0) uniquePartnerships++;
                     }
                 }
 
-                const partnershipCoverage = ((uniquePartnerships / (24 * 23 / 2)) * 100).toFixed(1);
-
                 return (
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Partnership Analysis</h2>
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <div className="bg-blue-50 p-4 rounded-lg text-center">
-                                <div className="text-2xl font-bold text-blue-600">{totalPartnerships}</div>
-                                <div className="text-sm text-blue-700">Total Partnerships</div>
-                            </div>
-                            <div className="bg-green-50 p-4 rounded-lg text-center">
-                                <div className="text-2xl font-bold text-green-600">{uniquePartnerships}</div>
-                                <div className="text-sm text-green-700">Unique Partnerships ({partnershipCoverage}%)</div>
-                            </div>
+                        <h2 className="text-2xl font-bold mb-4">Partnership Analysis</h2>
+                        <div className="mb-4 p-4 bg-blue-50 rounded">
+                            <p className="font-semibold">Unique Partnerships: {uniquePartnerships} / 276 ({(uniquePartnerships/276*100).toFixed(1)}%)</p>
+                        </div>
+                        <div className="text-sm">
+                            {playerNames.slice(0, 10).map((name, i) => {
+                                const partnerCount = partnerships[i+1].filter(p => p > 0).length;
+                                return (
+                                    <div key={i} className="border-b py-2">
+                                        <PlayerBadge playerNum={i+1} /> 
+                                        <span className="ml-2 text-gray-600">{partnerCount} different partners</span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 );
             }
 
             function KnockoutTab() {
-                // Calculate standings
                 const playerStats = {};
                 
                 for (let i = 1; i <= 24; i++) {
-                    playerStats[i] = {
-                        matches: 0, points: 0, pointsFor: 0, pointsAgainst: 0
-                    };
+                    playerStats[i] = { matches: 0, points: 0, pointsFor: 0, pointsAgainst: 0 };
                 }
                 
                 fixtures.forEach((round, roundIndex) => {
@@ -744,320 +452,104 @@
                         const matchNum = matchIndex + 1;
                         const scores = matchScores[roundNum]?.[matchNum];
                         
-                        if (scores && scores.team1Score !== null && scores.team2Score !== null) {
-                            const [team1p1, team1p2, team2p1, team2p2] = match;
-                            const team1Score = scores.team1Score;
-                            const team2Score = scores.team2Score;
+                        if (scores && scores.team1Score !== null) {
+                            const [t1p1, t1p2, t2p1, t2p2] = match;
+                            [t1p1, t1p2, t2p1, t2p2].forEach(p => playerStats[p].matches++);
                             
-                            [team1p1, team1p2, team2p1, team2p2].forEach(player => {
-                                playerStats[player].matches++;
-                            });
-                            
-                            playerStats[team1p1].pointsFor += team1Score;
-                            playerStats[team1p1].pointsAgainst += team2Score;
-                            playerStats[team1p2].pointsFor += team1Score;
-                            playerStats[team1p2].pointsAgainst += team2Score;
-                            playerStats[team2p1].pointsFor += team2Score;
-                            playerStats[team2p1].pointsAgainst += team1Score;
-                            playerStats[team2p2].pointsFor += team2Score;
-                            playerStats[team2p2].pointsAgainst += team1Score;
-                            
-                            if (team1Score > team2Score) {
-                                playerStats[team1p1].points += 3;
-                                playerStats[team1p2].points += 3;
-                            } else if (team2Score > team1Score) {
-                                playerStats[team2p1].points += 3;
-                                playerStats[team2p2].points += 3;
+                            if (scores.team1Score > scores.team2Score) {
+                                [t1p1, t1p2].forEach(p => playerStats[p].points += 3);
+                            } else if (scores.team2Score > scores.team1Score) {
+                                [t2p1, t2p2].forEach(p => playerStats[p].points += 3);
                             } else {
-                                playerStats[team1p1].points += 1;
-                                playerStats[team1p2].points += 1;
-                                playerStats[team2p1].points += 1;
-                                playerStats[team2p2].points += 1;
+                                [t1p1, t1p2, t2p1, t2p2].forEach(p => playerStats[p].points += 1);
                             }
                         }
                     });
                 });
                 
                 const sortedPlayers = Object.entries(playerStats)
-                    .map(([player, stats]) => ({
-                        player: parseInt(player), ...stats,
-                        pointsDiff: stats.pointsFor - stats.pointsAgainst
-                    }))
-                    .sort((a, b) => {
-                        if (b.points !== a.points) return b.points - a.points;
-                        if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
-                        return b.pointsFor - a.pointsFor;
-                    });
+                    .map(([player, stats]) => ({ player: parseInt(player), ...stats }))
+                    .sort((a, b) => b.points - a.points);
                 
                 const qualifiedPlayers = sortedPlayers.slice(0, 12).map(p => p.player);
                 
-                if (qualifiedPlayers.length < 12) {
-                    return (
-                        <div className="bg-white rounded-lg shadow-md p-6">
-                            <h2 className="text-2xl font-bold text-gray-800 mb-4">Knockout Stage</h2>
-                            <div className="text-center py-12">
-                                <div className="text-gray-400 text-6xl mb-4">🏆</div>
-                                <h3 className="text-lg font-semibold text-gray-600 mb-2">Complete the Round Robin Stage First</h3>
-                                <p className="text-gray-500">Top 12 players will qualify for the playoffs!</p>
-                            </div>
-                        </div>
-                    );
-                }
-
                 return (
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">🏆 Knockout Stage - Top 12 Players</h2>
-                        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                            {qualifiedPlayers.map((player, index) => (
-                                <div key={player} className="text-center p-2 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-300">
-                                    <div className="text-xs font-bold text-yellow-700 mb-1">#{index + 1}</div>
-                                    <PlayerBadge playerNum={player} />
-                                </div>
-                            ))}
-                        </div>
+                        <h2 className="text-2xl font-bold mb-4">🏆 Knockout Stage - Top 12 Qualify</h2>
+                        {qualifiedPlayers.length < 12 ? (
+                            <div className="text-center py-8">
+                                <p className="text-gray-500">Complete all 13 rounds to see qualified players</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-4 gap-2">
+                                {qualifiedPlayers.map((player, idx) => (
+                                    <div key={player} className="text-center p-2 bg-yellow-50 rounded border border-yellow-300">
+                                        <div className="text-xs font-bold">#{idx + 1}</div>
+                                        <PlayerBadge playerNum={player} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 );
             }
 
             return (
                 <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4">
-                    {showSaveIndicator && (
-                        <div className="auto-save-indicator">
-                            ✓ Auto-saved
-                        </div>
-                    )}
-                    
                     <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-gray-800 mb-2">🏓 Padel Tournament</h1>
-                            <p className="text-gray-600">24 Players • 13 Rounds • Auto-saves to your device</p>
+                        <div className="text-center mb-6">
+                            <h1 className="text-3xl font-bold text-gray-800">🏓 Padel Tournament</h1>
+                            <p className="text-gray-600">24 Players • 13 Rounds</p>
                         </div>
 
                         <div className="bg-white rounded-lg shadow-md mb-6">
                             <div className="flex border-b overflow-x-auto">
-                                <button
-                                    onClick={() => setActiveTab('tournament')}
-                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'tournament' ? 'bg-blue-500 text-white rounded-tl-lg' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
-                                >
-                                    🏆 Tournament
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('players')}
-                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'players' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
-                                >
-                                    👥 Players
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('data')}
-                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'data' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
-                                >
-                                    💾 Data
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('results')}
-                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'results' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
-                                >
-                                    📊 Results
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('fairness')}
-                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'fairness' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
-                                >
-                                    ⚖️ Fairness
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('partnerships')}
-                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'partnerships' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
-                                >
-                                    🤝 Partnerships
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('knockout')}
-                                    className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                                        activeTab === 'knockout' ? 'bg-blue-500 text-white rounded-tr-lg' : 'text-gray-600 hover:text-blue-500'
-                                    }`}
-                                >
-                                    🏆 Knockout
-                                </button>
+                                {[
+                                    {id: 'tournament', label: '🏆 Tournament'},
+                                    {id: 'players', label: '👥 Players'},
+                                    {id: 'data', label: '💾 Data'},
+                                    {id: 'results', label: '📊 Results'},
+                                    {id: 'fairness', label: '⚖️ Fairness'},
+                                    {id: 'fairness2', label: '⚖️ Fairness 2'},
+                                    {id: 'partnerships', label: '🤝 Partnerships'},
+                                    {id: 'knockout', label: '🏆 Knockout'}
+                                ].map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`flex-none py-3 px-3 text-xs font-semibold whitespace-nowrap ${
+                                            activeTab === tab.id ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
+                                        }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
                         {activeTab === 'tournament' && (
-                            <>
-                                <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-800 mb-4">Filters & Navigation</h2>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Round</label>
-                                            <select 
-                                                value={filterRound}
-                                                onChange={(e) => setFilterRound(e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            >
-                                                <option value="all">All Rounds</option>
-                                                {Array.from({ length: 13 }, (_, i) => i + 1).map(round => (
-                                                    <option key={round} value={round}>Round {round}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Player</label>
-                                            <select 
-                                                value={filterPlayer}
-                                                onChange={(e) => setFilterPlayer(e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            >
-                                                <option value="all">All Players</option>
-                                                {playerNames.map((name, index) => (
-                                                    <option key={index + 1} value={index + 1}>{name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        
-                                        <div className="flex items-end">
-                                            <button
-                                                onClick={clearFilters}
-                                                className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
-                                            >
-                                                Clear Filters
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {filterRound === 'all' && filterPlayer === 'all' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Quick Round Navigation</label>
-                                            <div className="grid grid-cols-7 sm:grid-cols-9 md:grid-cols-13 gap-1 md:gap-2 mb-2">
-                                                {Array.from({ length: 13 }, (_, i) => i + 1).map(round => (
-                                                    <button
-                                                        key={round}
-                                                        onClick={() => {
-                                                            setSelectedRound(round);
-                                                            setFilterRound(round.toString());
-                                                        }}
-                                                        className={`p-1 md:p-2 rounded-lg font-semibold transition-all duration-200 text-xs md:text-sm ${
-                                                            selectedRound === round
-                                                                ? 'bg-blue-500 text-white shadow-lg transform scale-105'
-                                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                        }`}
-                                                    >
-                                                        R{round}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="bg-white rounded-lg shadow-lg p-6">
-                                    <div className="text-center mb-4">
-                                        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                                            {filterRound !== 'all' && filterPlayer === 'all' ? `Round ${filterRound}` :
-                                            filterRound === 'all' && filterPlayer !== 'all' ? `Matches for ${playerNames[filterPlayer - 1]}` :
-                                            filterRound !== 'all' && filterPlayer !== 'all' ? `Round ${filterRound} - ${playerNames[filterPlayer - 1]}` :
-                                            'All Tournament Matches'}
-                                        </h2>
-                                    </div>
-                                    
-                                    {(() => {
-                                        const filteredMatches = getFilteredMatches();
-                                        return (
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                                                {filteredMatches.map((matchData, index) => (
-                                                    <div key={`${matchData.round}-${matchData.matchIndex}`} className="relative">
-                                                        <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                                                            R{matchData.round}
-                                                        </div>
-                                                        <MatchDisplay match={matchData.match} matchIndex={matchData.matchIndex} />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        );
-                                    })()}
-                                </div>
-                            </>
-                        )}
-
-                        {activeTab === 'data' && (
-                            <div className="space-y-6">
-                                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="text-2xl">✓</div>
-                                        <div>
-                                            <h3 className="font-bold text-green-800 mb-1">Auto-Save Enabled</h3>
-                                            <p className="text-sm text-green-700">
-                                                All changes are automatically saved to your device's storage. Your data persists even after closing the browser or refreshing the page.
-                                            </p>
-                                        </div>
+                            <div>
+                                <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+                                    <h2 className="text-xl font-bold mb-3">Round {selectedRound}</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {fixtures[selectedRound - 1].map((match, idx) => (
+                                            <MatchDisplay key={idx} match={match} matchIndex={idx} />
+                                        ))}
                                     </div>
                                 </div>
-
-                                <div className="bg-white rounded-lg shadow-md p-6">
-                                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Data Management</h2>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
-                                            <h3 className="text-lg font-semibold text-blue-800 mb-2">💾 Export Backup</h3>
-                                            <p className="text-sm text-blue-700 mb-4">Download all data as a JSON file.</p>
+                                <div className="bg-white rounded-lg shadow p-4">
+                                    <div className="flex gap-2 flex-wrap">
+                                        {Array.from({ length: 13 }, (_, i) => i + 1).map(round => (
                                             <button
-                                                onClick={exportData}
-                                                className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-semibold"
+                                                key={round}
+                                                onClick={() => setSelectedRound(round)}
+                                                className={`px-3 py-2 rounded font-semibold ${
+                                                    selectedRound === round ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                                                }`}
                                             >
-                                                Download Backup
+                                                R{round}
                                             </button>
-                                        </div>
-                                        
-                                        <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
-                                            <h3 className="text-lg font-semibold text-purple-800 mb-2">📂 Import Data</h3>
-                                            <p className="text-sm text-purple-700 mb-4">Upload a previously exported JSON file.</p>
-                                            <label className="w-full block">
-                                                <input
-                                                    type="file"
-                                                    accept=".json"
-                                                    onChange={importData}
-                                                    className="hidden"
-                                                />
-                                                <span className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors duration-200 font-semibold cursor-pointer block text-center">
-                                                    Choose File
-                                                </span>
-                                            </label>
-                                        </div>
-                                        
-                                        <div className="border-2 border-orange-200 rounded-lg p-4 bg-orange-50">
-                                            <h3 className="text-lg font-semibold text-orange-800 mb-2">⚠️ Reset Scores</h3>
-                                            <p className="text-sm text-orange-700 mb-4">Clear all match scores.</p>
-                                            <button
-                                                onClick={resetAllScores}
-                                                className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 font-semibold"
-                                            >
-                                                Reset Scores
-                                            </button>
-                                        </div>
-                                        
-                                        <div className="border-2 border-red-200 rounded-lg p-4 bg-red-50">
-                                            <h3 className="text-lg font-semibold text-red-800 mb-2">🗑️ Clear All Data</h3>
-                                            <p className="text-sm text-red-700 mb-4">Remove everything from device storage.</p>
-                                            <button
-                                                onClick={clearAllData}
-                                                className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-semibold"
-                                            >
-                                                Clear Everything
-                                            </button>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -1065,63 +557,78 @@
 
                         {activeTab === 'players' && (
                             <div className="bg-white rounded-lg shadow-lg p-6">
-                                <h2 className="text-2xl font-bold text-gray-800 mb-4">Edit Player Names & Ratings</h2>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {playerNames.map((name, index) => (
-                                        <div key={index} className="border border-gray-200 rounded-lg p-4">
-                                            <div className="flex items-center mb-3">
-                                                <span 
-                                                    className="inline-block px-2 py-1 rounded text-xs font-bold mr-2 text-white"
-                                                    style={{ backgroundColor: getTierColor(index + 1) }}
-                                                >
-                                                    #{index + 1}
+                                <h2 className="text-2xl font-bold mb-4">Edit Players</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {playerNames.map((name, idx) => (
+                                        <div key={idx} className="border p-3 rounded">
+                                            <label className="block text-sm font-medium mb-1">
+                                                <span style={{backgroundColor: getTierColor(idx+1), color: 'white'}} className="px-2 py-1 rounded text-xs mr-2">
+                                                    #{idx+1}
                                                 </span>
-                                                <span className="text-sm text-gray-600">{getTierName(index + 1)}</span>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Player Name</label>
-                                                    <input
-                                                        type="text"
-                                                        value={name}
-                                                        onChange={(e) => {
-                                                            const updatedNames = [...playerNames];
-                                                            updatedNames[index] = e.target.value || playerNames[index];
-                                                            setPlayerNames(updatedNames);
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-gray-700 mb-1">Skill Rating</label>
-                                                    <input
-                                                        type="number"
-                                                        step="0.05"
-                                                        min="0"
-                                                        max="5"
-                                                        value={skillRatings[index + 1]}
-                                                        onChange={(e) => {
-                                                            const value = parseFloat(e.target.value);
-                                                            if (!isNaN(value) && value >= 0 && value <= 5) {
-                                                                setSkillRatings(prev => ({
-                                                                    ...prev,
-                                                                    [index + 1]: value
-                                                                }));
-                                                            }
-                                                        }}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    />
-                                                </div>
-                                            </div>
+                                                {getTierName(idx+1)}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={name}
+                                                onChange={(e) => {
+                                                    const updated = [...playerNames];
+                                                    updated[idx] = e.target.value;
+                                                    setPlayerNames(updated);
+                                                }}
+                                                className="w-full px-3 py-2 border rounded mb-2"
+                                            />
+                                            <input
+                                                type="number"
+                                                step="0.05"
+                                                min="0"
+                                                max="5"
+                                                value={skillRatings[idx + 1]}
+                                                onChange={(e) => {
+                                                    const value = parseFloat(e.target.value);
+                                                    if (!isNaN(value) && value >= 0 && value <= 5) {
+                                                        setSkillRatings(prev => ({...prev, [idx + 1]: value}));
+                                                    }
+                                                }}
+                                                className="w-full px-3 py-2 border rounded"
+                                                placeholder="Rating"
+                                            />
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         )}
 
+                        {activeTab === 'data' && (
+                            <div className="bg-white rounded-lg shadow-lg p-6">
+                                <h2 className="text-2xl font-bold mb-4">Data Management</h2>
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-blue-50 rounded">
+                                        <p className="font-semibold text-blue-800">Note: For full export/import features with auto-save, download this HTML file to your device.</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => {
+                                            if(confirm('Reset all scores?')) {
+                                                const empty = {};
+                                                for (let r = 1; r <= 13; r++) {
+                                                    empty[r] = {};
+                                                    for (let m = 1; m <= 6; m++) {
+                                                        empty[r][m] = { team1Score: null, team2Score: null };
+                                                    }
+                                                }
+                                                setMatchScores(empty);
+                                            }
+                                        }}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                                    >
+                                        Reset All Scores
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {activeTab === 'results' && <ResultsTab />}
                         {activeTab === 'fairness' && <FairnessTab />}
+                        {activeTab === 'fairness2' && <Fairness2Tab />}
                         {activeTab === 'partnerships' && <PartnershipsTab />}
                         {activeTab === 'knockout' && <KnockoutTab />}
                     </div>
