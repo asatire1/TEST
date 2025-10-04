@@ -1,2004 +1,257 @@
-                    {playerNames.map((_, j) => {
-                      const freq = opponents[i + 1][j + 1];
-                      const isSelf = i === j;
-                      
-                      return (
-                        <td key={j} className={`border border-gray-400 w-8 h-8 p-0 text-center text-xs font-bold ${
-                          isSelf ? 'bg-gray-300' : 
-                          freq === 1 ? 'bg-red-100 text-red-900' :
-                          freq === 2 ? 'bg-red-200 text-red-900' :
-                          freq === 3 ? 'bg-orange-200 text-orange-900' :
-                          freq === 4 ? 'bg-orange-300 text-orange-900' :
-                          freq === 5 ? 'bg-yellow-200 text-yellow-900' :
-                          freq === 6 ? 'bg-yellow-300 text-yellow-900' :
-                          freq >= 7 ? 'bg-purple-300 text-purple-900' :
-                          'bg-white'
-                        }`}>
-                          {isSelf ? '-' : freq > 0 ? freq : ''}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-3 flex gap-2 text-xs flex-wrap">
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-red-100 border border-gray-400"></div>
-              <span>1x</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-red-200 border border-gray-400"></div>
-              <span>2x</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-orange-200 border border-gray-400"></div>
-              <span>3x</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-orange-300 border border-gray-400"></div>
-              <span>4x</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-yellow-200 border border-gray-400"></div>
-              <span>5x</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-yellow-300 border border-gray-400"></div>
-              <span>6x</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-purple-300 border border-gray-400"></div>
-              <span>7x+</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function KnockoutTab() {
-    const playerStats = {};
-    
-    for (let i = 1; i <= 24; i++) {
-      playerStats[i] = {
-        matches: 0, wins: 0, losses: 0, draws: 0, points: 0, pointsFor: 0, pointsAgainst: 0
-      };
+                <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#3B82F6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Padel Tournament">
+  <meta name="description" content="Professional Padel Tournament Manager - Track matches, scores, and standings">
+  
+  <title>Padel Tournament Manager</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     
-    fixtures.forEach((round, roundIndex) => {
-      const roundNum = roundIndex + 1;
-      round.forEach((match, matchIndex) => {
-        const matchNum = matchIndex + 1;
-        const scores = matchScores[roundNum]?.[matchNum];
+    /* Install prompt styles */
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 9999;
+      max-width: 90%;
+      animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .install-prompt button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 8px 16px;
+      margin: 0 4px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .install-prompt button:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- Install Prompt -->
+  <div id="install-prompt" style="display: none;" class="install-prompt">
+    <div style="margin-bottom: 8px; font-weight: bold;">📱 Install Padel Tournament App</div>
+    <div style="font-size: 14px; margin-bottom: 12px;">Add to your home screen for quick access!</div>
+    <button id="install-yes">Install</button>
+    <button id="install-no" style="background: transparent; color: white; border: 1px solid white;">Not Now</button>
+  </div>
+  
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect } = React;
+
+    function PadelTournamentApp() {
+      const [selectedRound, setSelectedRound] = useState(1);
+      const [activeTab, setActiveTab] = useState('tournament');
+      const [filterRound, setFilterRound] = useState('all');
+      const [filterPlayer, setFilterPlayer] = useState('all');
+      const [savedVersions, setSavedVersions] = useState([]);
+      
+      // Load player names from localStorage or use defaults
+      const [playerNames, setPlayerNames] = useState(() => {
+        const saved = localStorage.getItem('padelTournament_playerNames');
+        return saved ? JSON.parse(saved) : [
+          'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8',
+          'Player 9', 'Player 10', 'Player 11', 'Player 12', 'Player 13', 'Player 14', 'Player 15', 'Player 16',
+          'Player 17', 'Player 18', 'Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'
+        ];
+      });
+      
+      // Load skill ratings from localStorage or use defaults
+      const [skillRatings, setSkillRatings] = useState(() => {
+        const saved = localStorage.getItem('padelTournament_skillRatings');
+        return saved ? JSON.parse(saved) : {
+          1: 3.85, 2: 3.75, 3: 3.7, 4: 3.6, 5: 3.55, 6: 3.4, 7: 3.4, 8: 3.3,
+          9: 3.2, 10: 3.15, 11: 3.1, 12: 3.1, 13: 3.0, 14: 2.95, 15: 2.95, 16: 2.9,
+          17: 2.85, 18: 2.85, 19: 2.75, 20: 2.7, 21: 2.6, 22: 2.55, 23: 2.55, 24: 2.45
+        };
+      });
+      
+      // Load match scores from localStorage or initialize empty
+      const [matchScores, setMatchScores] = useState(() => {
+        const saved = localStorage.getItem('padelTournament_matchScores');
+        if (saved) return JSON.parse(saved);
         
-        if (scores && scores.team1Score !== null && scores.team2Score !== null) {
-          const [team1p1, team1p2, team2p1, team2p2] = match;
-          const team1Score = scores.team1Score;
-          const team2Score = scores.team2Score;
-          
-          [team1p1, team1p2, team2p1, team2p2].forEach(player => {
-            playerStats[player].matches++;
-          });
-          
-          playerStats[team1p1].pointsFor += team1Score;
-          playerStats[team1p1].pointsAgainst += team2Score;
-          playerStats[team1p2].pointsFor += team1Score;
-          playerStats[team1p2].pointsAgainst += team2Score;
-          playerStats[team2p1].pointsFor += team2Score;
-          playerStats[team2p1].pointsAgainst += team1Score;
-          playerStats[team2p2].pointsFor += team2Score;
-          playerStats[team2p2].pointsAgainst += team1Score;
-          
-          if (team1Score > team2Score) {
-            playerStats[team1p1].wins++;
-            playerStats[team1p2].wins++;
-            playerStats[team2p1].losses++;
-            playerStats[team2p2].losses++;
-            playerStats[team1p1].points += 3;
-            playerStats[team1p2].points += 3;
-          } else if (team2Score > team1Score) {
-            playerStats[team2p1].wins++;
-            playerStats[team2p2].wins++;
-            playerStats[team1p1].losses++;
-            playerStats[team1p2].losses++;
-            playerStats[team2p1].points += 3;
-            playerStats[team2p2].points += 3;
-          } else {
-            playerStats[team1p1].draws++;
-            playerStats[team1p2].draws++;
-            playerStats[team2p1].draws++;
-            playerStats[team2p2].draws++;
-            playerStats[team1p1].points += 1;
-            playerStats[team1p2].points += 1;
-            playerStats[team2p1].points += 1;
-            playerStats[team2p2].points += 1;
+        const initialScores = {};
+        for (let round = 1; round <= 13; round++) {
+          initialScores[round] = {};
+          for (let match = 1; match <= 6; match++) {
+            initialScores[round][match] = { team1Score: null, team2Score: null };
           }
         }
+        return initialScores;
       });
-    });
-    
-    const sortedPlayers = Object.entries(playerStats)
-      .map(([player, stats]) => ({
-        player: parseInt(player), ...stats,
-        pointsDiff: stats.pointsFor - stats.pointsAgainst
-      }))
-      .sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
-        return b.pointsFor - a.pointsFor;
+      
+      const [knockoutScores, setKnockoutScores] = useState(() => {
+        const saved = localStorage.getItem('padelTournament_knockoutScores');
+        return saved ? JSON.parse(saved) : {
+          qf1: { team1Score: null, team2Score: null },
+          qf2: { team1Score: null, team2Score: null },
+          qf3: { team1Score: null, team2Score: null },
+          qf4: { team1Score: null, team2Score: null },
+          sf1: { team1Score: null, team2Score: null },
+          sf2: { team1Score: null, team2Score: null },
+          final: { team1Score: null, team2Score: null }
+        };
       });
-    
-    const qualifiedPlayers = sortedPlayers.slice(0, 12).map(p => p.player);
-    
-    const handleKnockoutScore = (match, team, value) => {
-      let maxScore;
-      if (match === 'final') {
-        maxScore = finalMaxScore;
-      } else if (match === 'sf1' || match === 'sf2') {
-        maxScore = semiMaxScore;
-      } else {
-        maxScore = knockoutMaxScore;
-      }
       
-      const score = parseInt(value) || null;
-      if (score !== null && (score < 0 || score > maxScore)) return;
-      
-      setKnockoutScores(prev => {
-        const newScores = { ...prev };
-        if (!newScores[match]) newScores[match] = { team1Score: null, team2Score: null };
-        
-        if (team === 'team1') {
-          newScores[match].team1Score = score;
-          newScores[match].team2Score = score !== null ? maxScore - score : null;
-        } else {
-          newScores[match].team2Score = score;
-          newScores[match].team1Score = score !== null ? maxScore - score : null;
-        }
-        return newScores;
+      const [knockoutMaxScore, setKnockoutMaxScore] = useState(() => {
+        const saved = localStorage.getItem('padelTournament_knockoutMaxScore');
+        return saved ? parseInt(saved) : 16;
       });
-    };
-    
-    const clearKnockoutScore = (match) => {
-      setKnockoutScores(prev => ({
-        ...prev,
-        [match]: { team1Score: null, team2Score: null }
-      }));
-    };
-    
-    const getQFWinner = (qfNum) => {
-      const score = knockoutScores[`qf${qfNum}`];
-      if (!score || score.team1Score === null) return null;
-      return score.team1Score > score.team2Score ? 'team1' : 'team2';
-    };
-    
-    const getSFWinner = (sfNum) => {
-      const score = knockoutScores[`sf${sfNum}`];
-      if (!score || score.team1Score === null) return null;
-      return score.team1Score > score.team2Score ? 'team1' : 'team2';
-    };
-    
-    const KnockoutMatch = ({ title, team1Players, team2Players, matchId, subtitle }) => {
-      const scores = knockoutScores[matchId] || { team1Score: null, team2Score: null };
-      const isComplete = scores.team1Score !== null && scores.team2Score !== null;
-      const team1Win = isComplete && scores.team1Score > scores.team2Score;
-      const team2Win = isComplete && scores.team2Score > scores.team1Score;
       
-      let maxScore;
-      if (matchId === 'final') {
-        maxScore = finalMaxScore;
-      } else if (matchId === 'sf1' || matchId === 'sf2') {
-        maxScore = semiMaxScore;
-      } else {
-        maxScore = knockoutMaxScore;
-      }
+      const [semiMaxScore, setSemiMaxScore] = useState(() => {
+        const saved = localStorage.getItem('padelTournament_semiMaxScore');
+        return saved ? parseInt(saved) : 16;
+      });
+      
+      const [finalMaxScore, setFinalMaxScore] = useState(() => {
+        const saved = localStorage.getItem('padelTournament_finalMaxScore');
+        return saved ? parseInt(saved) : 16;
+      });
+      
+      // Auto-save to localStorage whenever data changes
+      useEffect(() => {
+        localStorage.setItem('padelTournament_playerNames', JSON.stringify(playerNames));
+      }, [playerNames]);
+
+      useEffect(() => {
+        localStorage.setItem('padelTournament_skillRatings', JSON.stringify(skillRatings));
+      }, [skillRatings]);
+
+      useEffect(() => {
+        localStorage.setItem('padelTournament_matchScores', JSON.stringify(matchScores));
+      }, [matchScores]);
+
+      useEffect(() => {
+        localStorage.setItem('padelTournament_knockoutScores', JSON.stringify(knockoutScores));
+      }, [knockoutScores]);
+
+      useEffect(() => {
+        localStorage.setItem('padelTournament_knockoutMaxScore', knockoutMaxScore.toString());
+      }, [knockoutMaxScore]);
+
+      useEffect(() => {
+        localStorage.setItem('padelTournament_semiMaxScore', semiMaxScore.toString());
+      }, [semiMaxScore]);
+
+      useEffect(() => {
+        localStorage.setItem('padelTournament_finalMaxScore', finalMaxScore.toString());
+      }, [finalMaxScore]);
+
+      // REST OF YOUR REACT CODE GOES HERE
+      // (Copy everything from the artifact starting from the fixtures constant)
       
       return (
-        <div className={`bg-white rounded-lg shadow-lg p-4 border-2 ${isComplete ? 'border-green-400' : 'border-gray-200'}`}>
-          <div className="text-center mb-3">
-            <h3 className="text-lg font-bold text-gray-800">{title}</h3>
-            {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
-          </div>
-          
-          <div className={`mb-3 p-3 rounded-lg ${team1Win ? 'bg-green-100 border-2 border-green-500' : 'bg-gray-50'}`}>
-            <div className="flex flex-wrap gap-1 mb-2">
-              {team1Players.map((p, i) => (
-                <PlayerBadge key={i} playerNum={p} isPartnership={true} />
-              ))}
-              {team1Win && <span className="ml-2 text-green-600 font-bold">🏆</span>}
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-gray-800 mb-2">🏓 Padel Tournament</h1>
+              <p className="text-gray-600">24 Players • 13 Rounds • Fairness-Optimized Competition</p>
             </div>
-          </div>
-          
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <input
-              type="number"
-              min="0"
-              max={maxScore}
-              value={scores.team1Score || ''}
-              onChange={(e) => handleKnockoutScore(matchId, 'team1', e.target.value)}
-              className="w-14 h-10 text-center border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-bold"
-              placeholder="0"
-            />
-            <span className="text-xl font-bold text-gray-600">-</span>
-            <input
-              type="number"
-              min="0"
-              max={maxScore}
-              value={scores.team2Score || ''}
-              onChange={(e) => handleKnockoutScore(matchId, 'team2', e.target.value)}
-              className="w-14 h-10 text-center border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-bold"
-              placeholder="0"
-            />
-            {isComplete && (
-              <button
-                onClick={() => clearKnockoutScore(matchId)}
-                className="ml-1 text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-600"
-                title="Clear score"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-          
-          <div className={`p-3 rounded-lg ${team2Win ? 'bg-green-100 border-2 border-green-500' : 'bg-gray-50'}`}>
-            <div className="flex flex-wrap gap-1">
-              {team2Players.map((p, i) => (
-                <PlayerBadge key={i} playerNum={p} isPartnership={true} />
-              ))}
-              {team2Win && <span className="ml-2 text-green-600 font-bold">🏆</span>}
-            </div>
-          </div>
-        </div>
-      );
-    };
-    
-    if (qualifiedPlayers.length < 12) {
-      return (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Knockout Stage</h2>
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🏆</div>
-            <h3 className="text-lg font-semibold text-gray-600 mb-2">Complete the Round Robin Stage First</h3>
-            <p className="text-gray-500">The knockout stage will become available once all 13 rounds are completed.</p>
-            <p className="text-gray-500 mt-2">Top 12 players will qualify for the playoffs!</p>
-          </div>
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div>
-                <h4 className="font-semibold text-blue-800 mb-1">Knockout Stage Scoring</h4>
-                <p className="text-sm text-blue-700">Configure match points for playoff games</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-blue-800">Match Points:</label>
-                <select 
-                  value={knockoutMaxScore}
-                  onChange={(e) => setKnockoutMaxScore(parseInt(e.target.value))}
-                  className="px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white font-semibold"
-                >
-                  <option value={8}>Best of 8</option>
-                  <option value={9}>Best of 9</option>
-                  <option value={10}>Best of 10</option>
-                  <option value={11}>Best of 11</option>
-                  <option value={12}>Best of 12</option>
-                  <option value={13}>Best of 13</option>
-                  <option value={14}>Best of 14</option>
-                  <option value={15}>Best of 15</option>
-                  <option value={16}>Best of 16</option>
-                  <option value={17}>Best of 17</option>
-                  <option value={18}>Best of 18</option>
-                  <option value={19}>Best of 19</option>
-                  <option value={20}>Best of 20</option>
-                  <option value={21}>Best of 21</option>
-                  <option value={22}>Best of 22</option>
-                  <option value={23}>Best of 23</option>
-                  <option value={24}>Best of 24</option>
-                </select>
-              </div>
-            </div>
+            {/* REST OF YOUR JSX */}
           </div>
         </div>
       );
     }
-    
-    const qf1Winner = getQFWinner(1);
-    const qf4Winner = getQFWinner(4);
-    const qf2Winner = getQFWinner(2);
-    const qf3Winner = getQFWinner(3);
-    
-    const sf1Team1 = qf1Winner === 'team1' ? [qualifiedPlayers[0], qualifiedPlayers[2]] : qf1Winner === 'team2' ? [qualifiedPlayers[13], qualifiedPlayers[15]] : null;
-    const sf1Team2 = qf4Winner === 'team1' ? [qualifiedPlayers[5], qualifiedPlayers[7]] : qf4Winner === 'team2' ? [qualifiedPlayers[8], qualifiedPlayers[10]] : null;
-    
-    const sf2Team1 = qf2Winner === 'team1' ? [qualifiedPlayers[1], qualifiedPlayers[3]] : qf2Winner === 'team2' ? [qualifiedPlayers[12], qualifiedPlayers[14]] : null;
-    const sf2Team2 = qf3Winner === 'team1' ? [qualifiedPlayers[4], qualifiedPlayers[6]] : qf3Winner === 'team2' ? [qualifiedPlayers[9], qualifiedPlayers[11]] : null;
-    
-    const sf1Winner = getSFWinner(1);
-    const sf2Winner = getSFWinner(2);
-    
-    const finalTeam1 = sf1Winner === 'team1' ? sf1Team1 : sf1Winner === 'team2' ? sf1Team2 : null;
-    const finalTeam2 = sf2Winner === 'team1' ? sf2Team1 : sf2Winner === 'team2' ? sf2Team2 : null;
-    
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">🏆 Knockout Stage - Top 12 Players</h2>
-          
-          <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div>
-                <h4 className="font-semibold text-blue-800 mb-1">Quarter Finals Scoring</h4>
-                <p className="text-sm text-blue-700">Set match points for QF matches</p>
-              </div>
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-blue-300 shadow-sm">
-                <label className="text-sm font-bold text-blue-900">Match Points:</label>
-                <select 
-                  value={knockoutMaxScore}
-                  onChange={(e) => setKnockoutMaxScore(parseInt(e.target.value))}
-                  className="px-4 py-2 border-2 border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white font-bold text-blue-900 cursor-pointer"
-                >
-                  <option value={8}>Best of 8</option>
-                  <option value={9}>Best of 9</option>
-                  <option value={10}>Best of 10</option>
-                  <option value={11}>Best of 11</option>
-                  <option value={12}>Best of 12</option>
-                  <option value={13}>Best of 13</option>
-                  <option value={14}>Best of 14</option>
-                  <option value={15}>Best of 15</option>
-                  <option value={16}>Best of 16</option>
-                  <option value={17}>Best of 17</option>
-                  <option value={18}>Best of 18</option>
-                  <option value={19}>Best of 19</option>
-                  <option value={20}>Best of 20</option>
-                  <option value={21}>Best of 21</option>
-                  <option value={22}>Best of 22</option>
-                  <option value={23}>Best of 23</option>
-                  <option value={24}>Best of 24</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div>
-                <h4 className="font-semibold text-purple-800 mb-1">Semi Finals Scoring</h4>
-                <p className="text-sm text-purple-700">Set match points for SF matches</p>
-              </div>
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-purple-300 shadow-sm">
-                <label className="text-sm font-bold text-purple-900">Match Points:</label>
-                <select 
-                  value={semiMaxScore}
-                  onChange={(e) => setSemiMaxScore(parseInt(e.target.value))}
-                  className="px-4 py-2 border-2 border-purple-400 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white font-bold text-purple-900 cursor-pointer"
-                >
-                  <option value={8}>Best of 8</option>
-                  <option value={9}>Best of 9</option>
-                  <option value={10}>Best of 10</option>
-                  <option value={11}>Best of 11</option>
-                  <option value={12}>Best of 12</option>
-                  <option value={13}>Best of 13</option>
-                  <option value={14}>Best of 14</option>
-                  <option value={15}>Best of 15</option>
-                  <option value={16}>Best of 16</option>
-                  <option value={17}>Best of 17</option>
-                  <option value={18}>Best of 18</option>
-                  <option value={19}>Best of 19</option>
-                  <option value={20}>Best of 20</option>
-                  <option value={21}>Best of 21</option>
-                  <option value={22}>Best of 22</option>
-                  <option value={23}>Best of 23</option>
-                  <option value={24}>Best of 24</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border-2 border-yellow-300">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div>
-                <h4 className="font-semibold text-yellow-800 mb-1">🏆 Final Match Scoring</h4>
-                <p className="text-sm text-yellow-700">Set match points for the championship final</p>
-              </div>
-              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-yellow-400 shadow-sm">
-                <label className="text-sm font-bold text-yellow-900">Match Points:</label>
-                <select 
-                  value={finalMaxScore}
-                  onChange={(e) => setFinalMaxScore(parseInt(e.target.value))}
-                  className="px-4 py-2 border-2 border-yellow-500 rounded-lg focus:ring-2 focus:ring-yellow-600 focus:border-transparent bg-white font-bold text-yellow-900 cursor-pointer"
-                >
-                  <option value={8}>Best of 8</option>
-                  <option value={9}>Best of 9</option>
-                  <option value={10}>Best of 10</option>
-                  <option value={11}>Best of 11</option>
-                  <option value={12}>Best of 12</option>
-                  <option value={13}>Best of 13</option>
-                  <option value={14}>Best of 14</option>
-                  <option value={15}>Best of 15</option>
-                  <option value={16}>Best of 16</option>
-                  <option value={17}>Best of 17</option>
-                  <option value={18}>Best of 18</option>
-                  <option value={19}>Best of 19</option>
-                  <option value={20}>Best of 20</option>
-                  <option value={21}>Best of 21</option>
-                  <option value={22}>Best of 22</option>
-                  <option value={23}>Best of 23</option>
-                  <option value={24}>Best of 24</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {qualifiedPlayers.map((player, index) => (
-              <div key={player} className="text-center p-2 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-300">
-                <div className="text-xs font-bold text-yellow-700 mb-1">#{index + 1}</div>
-                <PlayerBadge playerNum={player} />
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Quarter Finals</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <KnockoutMatch 
-              title="QF1" 
-              subtitle="1st/3rd vs 14th/16th"
-              team1Players={[qualifiedPlayers[0], qualifiedPlayers[2]]}
-              team2Players={[qualifiedPlayers[13], qualifiedPlayers[15]]}
-              matchId="qf1"
-            />
-            <KnockoutMatch 
-              title="QF2" 
-              subtitle="2nd/4th vs 13th/15th"
-              team1Players={[qualifiedPlayers[1], qualifiedPlayers[3]]}
-              team2Players={[qualifiedPlayers[12], qualifiedPlayers[14]]}
-              matchId="qf2"
-            />
-            <KnockoutMatch 
-              title="QF3" 
-              subtitle="5th/7th vs 10th/12th"
-              team1Players={[qualifiedPlayers[4], qualifiedPlayers[6]]}
-              team2Players={[qualifiedPlayers[9], qualifiedPlayers[11]]}
-              matchId="qf3"
-            />
-            <KnockoutMatch 
-              title="QF4" 
-              subtitle="6th/8th vs 9th/11th"
-              team1Players={[qualifiedPlayers[5], qualifiedPlayers[7]]}
-              team2Players={[qualifiedPlayers[8], qualifiedPlayers[10]]}
-              matchId="qf4"
-            />
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Semi Finals</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {sf1Team1 && sf1Team2 ? (
-              <KnockoutMatch 
-                title="SF1" 
-                subtitle="Winner QF1 vs Winner QF4"
-                team1Players={sf1Team1}
-                team2Players={sf1Team2}
-                matchId="sf1"
-              />
-            ) : (
-              <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-400">
-                <p className="font-semibold">Complete QF1 and QF4 first</p>
-              </div>
-            )}
-            
-            {sf2Team1 && sf2Team2 ? (
-              <KnockoutMatch 
-                title="SF2" 
-                subtitle="Winner QF2 vs Winner QF3"
-                team1Players={sf2Team1}
-                team2Players={sf2Team2}
-                matchId="sf2"
-              />
-            ) : (
-              <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-400">
-                <p className="font-semibold">Complete QF2 and QF3 first</p>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg shadow-lg p-6 border-2 border-yellow-400">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">🏆 FINAL 🏆</h2>
-          {finalTeam1 && finalTeam2 ? (
-            <div className="max-w-md mx-auto">
-              <KnockoutMatch 
-                title="Championship Match" 
-                subtitle="Winner SF1 vs Winner SF2"
-                team1Players={finalTeam1}
-                team2Players={finalTeam2}
-                matchId="final"
-              />
-              {knockoutScores.final?.team1Score !== null && knockoutScores.final?.team2Score !== null && (
-                <div className="mt-6 text-center">
-                  <div className="text-3xl mb-2">🎉</div>
-                  <h3 className="text-xl font-bold text-yellow-700">Tournament Champions!</h3>
-                  <div className="flex justify-center gap-2 mt-3">
-                    {knockoutScores.final.team1Score > knockoutScores.final.team2Score ? (
-                      finalTeam1.map(p => <PlayerBadge key={p} playerNum={p} />)
-                    ) : (
-                      finalTeam2.map(p => <PlayerBadge key={p} playerNum={p} />)
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg p-12 text-center text-gray-400">
-              <p className="font-semibold text-lg">Complete both Semi Finals to unlock the Final</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-2 sm:p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">🏓 Padel Tournament</h1>
-          <p className="text-gray-600">24 Players • 13 Rounds • Fairness-Optimized Competition</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md mb-6">
-          <div className="flex border-b overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('tournament')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'tournament' ? 'bg-blue-500 text-white rounded-tl-lg' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              🏆 Tournament Fixtures
-            </button>
-            <button
-              onClick={() => setActiveTab('players')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'players' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              👥 Player Names
-            </button>
-            <button
-              onClick={() => setActiveTab('data')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'data' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              💾 Data Management
-            </button>
-            <button
-              onClick={() => setActiveTab('results')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'results' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              📊 Results & Standings
-            </button>
-            <button
-              onClick={() => setActiveTab('fairness')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'fairness' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              ⚖️ Fairness
-            </button>
-            <button
-              onClick={() => setActiveTab('fairness2')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'fairness2' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              ⚖️ Fairness 2
-            </button>
-            <button
-              onClick={() => setActiveTab('partnerships')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'partnerships' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              🤝 Partnerships
-            </button>
-            <button
-              onClick={() => setActiveTab('knockout')}
-              className={`flex-none py-4 px-4 lg:px-6 text-center font-semibold transition-colors duration-200 text-sm lg:text-base whitespace-nowrap ${
-                activeTab === 'knockout' ? 'bg-blue-500 text-white rounded-tr-lg' : 'text-gray-600 hover:text-blue-500'
-              }`}
-            >
-              🏆 Knockout Stage
-            </button>
-          </div>
-        </div>
-
-        {activeTab === 'tournament' && (
-          <>
-            <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Filters & Navigation</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Round</label>
-                  <select 
-                    value={filterRound}
-                    onChange={(e) => setFilterRound(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="all">All Rounds</option>
-                    {Array.from({ length: 13 }, (_, i) => i + 1).map(round => (
-                      <option key={round} value={round}>Round {round}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Player</label>
-                  <select 
-                    value={filterPlayer}
-                    onChange={(e) => setFilterPlayer(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="all">All Players</option>
-                    {playerNames.map((name, index) => (
-                      <option key={index + 1} value={index + 1}>{name}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="flex items-end">
-                  <button
-                    onClick={clearFilters}
-                    className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    Clear Filters
-                  </button>
-                </div>
-              </div>
-
-              {filterRound === 'all' && filterPlayer === 'all' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Quick Round Navigation</label>
-                  <div className="grid grid-cols-7 sm:grid-cols-9 md:grid-cols-13 gap-1 md:gap-2 mb-2">
-                    {Array.from({ length: 13 }, (_, i) => i + 1).map(round => (
-                      <button
-                        key={round}
-                        onClick={() => {
-                          setSelectedRound(round);
-                          setFilterRound(round.toString());
-                        }}
-                        className={`p-1 md:p-2 rounded-lg font-semibold transition-all duration-200 text-xs md:text-sm ${
-                          selectedRound === round
-                            ? 'bg-blue-500 text-white shadow-lg transform scale-105'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        R{round}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="text-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  {filterRound !== 'all' && filterPlayer === 'all' ? `Round ${filterRound}` :
-                   filterRound === 'all' && filterPlayer !== 'all' ? `Matches for ${playerNames[filterPlayer - 1]}` :
-                   filterRound !== 'all' && filterPlayer !== 'all' ? `Round ${filterRound} - ${playerNames[filterPlayer - 1]}` :
-                   'All Tournament Matches'}
-                </h2>
-                
-                <div className="flex justify-center gap-4 mt-2 text-xs">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-purple-500 rounded mr-1"></div>
-                    <span>Within Group</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded mr-1"></div>
-                    <span>Cross Group</span>
-                  </div>
-                </div>
-              </div>
-              
-              {(() => {
-                const filteredMatches = getFilteredMatches();
-                return (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                      {filteredMatches.map((matchData, index) => (
-                        <div key={`${matchData.round}-${matchData.matchIndex}`} className="relative">
-                          <div className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                            R{matchData.round}
-                          </div>
-                          <MatchDisplay match={matchData.match} matchIndex={matchData.matchIndex} />
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {filteredMatches.length === 0 && (
-                      <div className="text-center py-12">
-                        <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                        <h3 className="text-lg font-semibold text-gray-600 mb-2">No matches found</h3>
-                        <p className="text-gray-500">Try adjusting your filters to see more results</p>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-            </div>
-          </>
-        )}
-
-        {activeTab === 'data' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Data Management</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
-                  <h3 className="text-lg font-semibold text-blue-800 mb-2">💾 Export Tournament Data</h3>
-                  <p className="text-sm text-blue-700 mb-4">Download all data as a JSON file. Keep this file safe - you can use it to restore everything later!</p>
-                  <button
-                    onClick={exportData}
-                    className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-semibold"
-                  >
-                    Download Data File
-                  </button>
-                </div>
-                
-                <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
-                  <h3 className="text-lg font-semibold text-purple-800 mb-2">📂 Import Tournament Data</h3>
-                  <p className="text-sm text-purple-700 mb-4">Upload a previously exported JSON file to restore your tournament data.</p>
-                  <label className="w-full block">
-                    <input
-                      type="file"
-                      accept=".json"
-                      onChange={importData}
-                      className="hidden"
-                      id="import-file"
-                    />
-                    <span className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors duration-200 font-semibold cursor-pointer block text-center">
-                      Choose File to Import
-                    </span>
-                  </label>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border-2 border-red-200 rounded-lg p-4 bg-red-50">
-                  <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ Reset Match Scores</h3>
-                  <p className="text-sm text-red-700 mb-4">Clear all match scores while keeping player names and ratings. Auto-saves a backup first.</p>
-                  <button
-                    onClick={resetAllScores}
-                    className="w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-semibold"
-                  >
-                    Reset All Scores
-                  </button>
-                </div>
-                
-                <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
-                  <h3 className="text-lg font-semibold text-green-800 mb-2">💾 Save Current Version</h3>
-                  <p className="text-sm text-green-700 mb-4">Create a named backup of all current data (stored in this session only).</p>
-                  <button
-                    onClick={saveCurrentVersion}
-                    className="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 font-semibold"
-                  >
-                    Save Backup
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Saved Versions ({savedVersions.length}/10)</h2>
-              
-              {savedVersions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <div className="text-4xl mb-2">📦</div>
-                  <p>No saved versions yet. Click "Save Backup" to create one.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {savedVersions.map(version => (
-                    <div key={version.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-800">{version.name}</h3>
-                          <p className="text-xs text-gray-500">{version.timestamp}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => loadVersion(version)}
-                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                          >
-                            Load
-                          </button>
-                          <button
-                            onClick={() => deleteVersion(version.id)}
-                            className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {Object.values(version.matchScores).reduce((total, round) => 
-                          total + Object.values(round).filter(match => match.team1Score !== null).length, 0
-                        )} matches recorded
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'players' && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Edit Player Names</h2>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setPlayerNames([
-                      'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8',
-                      'Player 9', 'Player 10', 'Player 11', 'Player 12', 'Player 13', 'Player 14', 'Player 15', 'Player 16',
-                      'Player 17', 'Player 18', 'Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'
-                    ]);
-                  }}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
-                >
-                  Reset All Names
-                </button>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {playerNames.map((name, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center mb-3">
-                    <span 
-                      className="inline-block px-2 py-1 rounded text-xs font-bold mr-2 text-white"
-                      style={{ backgroundColor: getTierColor(index + 1) }}
-                    >
-                      #{index + 1}
-                    </span>
-                    <span className="text-sm text-gray-600">{getTierName(index + 1)}</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Player Name</label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => {
-                          const updatedNames = [...playerNames];
-                          updatedNames[index] = e.target.value || playerNames[index];
-                          setPlayerNames(updatedNames);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={name}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Skill Rating</label>
-                      <input
-                        type="number"
-                        step="0.05"
-                        min="0"
-                        max="5"
-                        value={skillRatings[index + 1]}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value);
-                          if (!isNaN(value) && value >= 0 && value <= 5) {
-                            setSkillRatings(prev => ({
-                              ...prev,
-                              [index + 1]: value
-                            }));
-                          }
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">Tips:</h4>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Player 1, 2, 3 & 4 are Elite level (strongest players)</li>
-                <li>• Player 21, 22, 23 & 24 are Beginner level (developing players)</li>
-                <li>• Ratings range from 0 to 5, with higher numbers indicating stronger players</li>
-                <li>• Names and ratings will appear on all tournament fixtures and results</li>
-                <li>• Use Data Management tab to save backups of your tournament data</li>
-              </ul>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'results' && <ResultsTab />}
-        
-        {activeTab === 'fairness' && <FairnessTab />}
-        
-        {activeTab === 'fairness2' && <Fairness2Tab />}
-        
-        {activeTab === 'partnerships' && <PartnershipsTab />}
-        
-        {activeTab === 'knockout' && <KnockoutTab />}
-      </div>
-    </div>
-  );
-}
-
-export default PadelTournamentApp;import { useState } from 'react';
-
-function PadelTournamentApp() {
-  const [selectedRound, setSelectedRound] = useState(1);
-  const [activeTab, setActiveTab] = useState('tournament');
-  const [filterRound, setFilterRound] = useState('all');
-  const [filterPlayer, setFilterPlayer] = useState('all');
-  const [savedVersions, setSavedVersions] = useState([]);
-  const [knockoutScores, setKnockoutScores] = useState({
-    qf1: { team1Score: null, team2Score: null },
-    qf2: { team1Score: null, team2Score: null },
-    qf3: { team1Score: null, team2Score: null },
-    qf4: { team1Score: null, team2Score: null },
-    sf1: { team1Score: null, team2Score: null },
-    sf2: { team1Score: null, team2Score: null },
-    final: { team1Score: null, team2Score: null }
-  });
-  const [knockoutMaxScore, setKnockoutMaxScore] = useState(16);
-  const [semiMaxScore, setSemiMaxScore] = useState(16);
-  const [finalMaxScore, setFinalMaxScore] = useState(16);
+    ReactDOM.render(<PadelTournamentApp />, document.getElementById('root'));
+  </script>
   
-  const [playerNames, setPlayerNames] = useState([
-    'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7', 'Player 8',
-    'Player 9', 'Player 10', 'Player 11', 'Player 12', 'Player 13', 'Player 14', 'Player 15', 'Player 16',
-    'Player 17', 'Player 18', 'Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'
-  ]);
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
-  const [skillRatings, setSkillRatings] = useState({
-    1: 3.85, 2: 3.75, 3: 3.7, 4: 3.6, 5: 3.55, 6: 3.4, 7: 3.4, 8: 3.3,
-    9: 3.2, 10: 3.15, 11: 3.1, 12: 3.1, 13: 3.0, 14: 2.95, 15: 2.95, 16: 2.9,
-    17: 2.85, 18: 2.85, 19: 2.75, 20: 2.7, 21: 2.6, 22: 2.55, 23: 2.55, 24: 2.45
-  });
-  
-  const [matchScores, setMatchScores] = useState(() => {
-    const initialScores = {};
-    for (let round = 1; round <= 13; round++) {
-      initialScores[round] = {};
-      for (let match = 1; match <= 6; match++) {
-        initialScores[round][match] = { team1Score: null, team2Score: null };
-      }
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('✅ Service Worker registered'))
+          .catch(err => console.log('❌ Service Worker registration failed:', err));
+      });
     }
-    return initialScores;
-  });
-  
-  const resetAllScores = () => {
-    const timestamp = new Date().toLocaleString();
-    const newVersion = {
-      id: Date.now(),
-      name: `Auto-backup before reset ${timestamp}`,
-      timestamp: timestamp,
-      playerNames: [...playerNames],
-      skillRatings: { ...skillRatings },
-      matchScores: JSON.parse(JSON.stringify(matchScores)),
-      knockoutScores: JSON.parse(JSON.stringify(knockoutScores)),
-      knockoutMaxScore: knockoutMaxScore,
-      semiMaxScore: semiMaxScore,
-      finalMaxScore: finalMaxScore
-    };
-    setSavedVersions(prev => [newVersion, ...prev].slice(0, 10));
     
-    const emptyScores = {};
-    for (let round = 1; round <= 13; round++) {
-      emptyScores[round] = {};
-      for (let match = 1; match <= 6; match++) {
-        emptyScores[round][match] = { team1Score: null, team2Score: null };
-      }
-    }
-    setMatchScores(emptyScores);
-    window.alert('Backup saved! All scores have been reset!');
-  };
-  
-  const saveCurrentVersion = () => {
-    const timestamp = new Date().toLocaleString();
-    const versionName = window.prompt('Enter a name for this saved version:', `Backup ${timestamp}`);
-    if (versionName) {
-      const newVersion = {
-        id: Date.now(),
-        name: versionName,
-        timestamp: timestamp,
-        playerNames: [...playerNames],
-        skillRatings: { ...skillRatings },
-        matchScores: JSON.parse(JSON.stringify(matchScores)),
-        knockoutScores: JSON.parse(JSON.stringify(knockoutScores)),
-        knockoutMaxScore: knockoutMaxScore,
-        semiMaxScore: semiMaxScore,
-        finalMaxScore: finalMaxScore
-      };
-      setSavedVersions(prev => [newVersion, ...prev].slice(0, 10));
-      window.alert('Version saved successfully!');
-    }
-  };
-  
-  const loadVersion = (version) => {
-    const timestamp = new Date().toLocaleString();
-    const newVersion = {
-      id: Date.now(),
-      name: `Auto-backup before loading ${timestamp}`,
-      timestamp: timestamp,
-      playerNames: [...playerNames],
-      skillRatings: { ...skillRatings },
-      matchScores: JSON.parse(JSON.stringify(matchScores)),
-      knockoutScores: JSON.parse(JSON.stringify(knockoutScores)),
-      knockoutMaxScore: knockoutMaxScore,
-      semiMaxScore: semiMaxScore,
-      finalMaxScore: finalMaxScore
-    };
-    setSavedVersions(prev => [newVersion, ...prev].slice(0, 10));
+    // PWA Install Prompt
+    let deferredPrompt;
+    const installPrompt = document.getElementById('install-prompt');
+    const installYes = document.getElementById('install-yes');
+    const installNo = document.getElementById('install-no');
     
-    setPlayerNames([...version.playerNames]);
-    setSkillRatings({ ...version.skillRatings });
-    setMatchScores(JSON.parse(JSON.stringify(version.matchScores)));
-    if (version.knockoutScores) {
-      setKnockoutScores(JSON.parse(JSON.stringify(version.knockoutScores)));
-    }
-    if (version.knockoutMaxScore) {
-      setKnockoutMaxScore(version.knockoutMaxScore);
-    }
-    if (version.semiMaxScore) {
-      setSemiMaxScore(version.semiMaxScore);
-    }
-    if (version.finalMaxScore) {
-      setFinalMaxScore(version.finalMaxScore);
-    }
-    window.alert('Current state backed up! Version loaded successfully!');
-  };
-  
-  const deleteVersion = (versionId) => {
-    if (window.confirm('Delete this saved version?')) {
-      setSavedVersions(prev => prev.filter(v => v.id !== versionId));
-    }
-  };
-  
-  const exportData = () => {
-    const exportData = {
-      playerNames,
-      skillRatings,
-      matchScores,
-      knockoutScores,
-      knockoutMaxScore,
-      semiMaxScore,
-      finalMaxScore,
-      savedVersions,
-      exportDate: new Date().toISOString()
-    };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `padel-tournament-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    window.alert('Tournament data exported successfully!');
-  };
-  
-  const importData = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const importedData = JSON.parse(e.target.result);
-        
-        if (importedData.playerNames) setPlayerNames(importedData.playerNames);
-        if (importedData.skillRatings) setSkillRatings(importedData.skillRatings);
-        if (importedData.matchScores) setMatchScores(importedData.matchScores);
-        if (importedData.knockoutScores) setKnockoutScores(importedData.knockoutScores);
-        if (importedData.knockoutMaxScore) setKnockoutMaxScore(importedData.knockoutMaxScore);
-        if (importedData.semiMaxScore) setSemiMaxScore(importedData.semiMaxScore);
-        if (importedData.finalMaxScore) setFinalMaxScore(importedData.finalMaxScore);
-        if (importedData.savedVersions) setSavedVersions(importedData.savedVersions);
-        
-        window.alert('Tournament data imported successfully!');
-      } catch (error) {
-        window.alert('Error importing data. Please make sure the file is valid.');
-      }
-    };
-    reader.readAsText(file);
-    event.target.value = '';
-  };
-  
-  const fixtures = [
-    [[1,4,2,3], [5,8,6,7], [9,12,10,11], [13,16,14,15], [17,20,18,19], [21,24,22,23]],
-    [[1,24,10,16], [2,23,6,19], [3,22,7,18], [4,21,8,17], [5,20,13,12], [11,15,14,9]],
-    [[1,10,9,4], [2,11,12,3], [5,18,13,8], [6,17,14,7], [15,24,19,20], [16,23,22,21]],
-    [[1,21,17,2], [4,19,18,3], [5,12,9,8], [6,11,10,7], [13,24,20,16], [14,23,22,15]],
-    [[4,14,13,1], [2,16,15,3], [6,24,21,10], [5,23,11,7], [8,22,17,12], [9,19,18,20]],
-    [[1,12,5,4], [2,7,6,3], [9,20,21,8], [10,23,22,11], [13,24,17,18], [14,19,16,15]],
-    [[2,24,5,20], [4,23,6,19], [1,22,7,18], [3,21,8,17], [15,16,13,12], [9,11,14,10]],
-    [[5,12,9,4], [1,13,8,2], [6,16,11,10], [3,17,14,7], [21,19,23,20], [22,18,15,24]],
-    [[2,24,17,4], [1,19,18,3], [6,12,11,8], [5,9,10,7], [14,20,21,16], [13,23,22,15]],
-    [[2,23,15,5], [1,22,4,20], [8,7,9,18], [12,14,19,13], [3,24,10,17], [11,16,6,21]],
-    [[12,22,16,20], [1,23,6,11], [2,9,7,8], [3,21,5,13], [10,18,14,15], [24,4,19,17]],
-    [[2,16,13,4], [5,17,14,1], [6,24,21,8], [3,22,15,7], [10,18,23,12], [9,19,20,11]],
-    [[2,8,5,4], [3,7,6,1], [10,24,21,12], [9,23,15,11], [14,20,17,16], [13,19,18,22]]
-  ];
-
-  const getFilteredMatches = () => {
-    let filteredMatches = [];
-    const roundsToShow = filterRound === 'all' 
-      ? Array.from({ length: 13 }, (_, i) => i + 1)
-      : [parseInt(filterRound)];
-    
-    roundsToShow.forEach(roundNum => {
-      if (fixtures[roundNum - 1]) {
-        fixtures[roundNum - 1].forEach((match, matchIndex) => {
-          const [p1, p2, p3, p4] = match;
-          if (filterPlayer === 'all' || [p1, p2, p3, p4].includes(parseInt(filterPlayer))) {
-            filteredMatches.push({
-              round: roundNum,
-              matchIndex: matchIndex,
-              match: match
-            });
-          }
-        });
-      }
-    });
-    return filteredMatches;
-  };
-
-  const clearFilters = () => {
-    setFilterRound('all');
-    setFilterPlayer('all');
-  };
-
-  const handleScoreChange = (round, match, team, value) => {
-    const score = parseInt(value) || null;
-    if (score !== null && (score < 0 || score > 16)) return;
-    
-    setMatchScores(prev => {
-      const newScores = { ...prev };
-      if (!newScores[round]) newScores[round] = {};
-      if (!newScores[round][match]) newScores[round][match] = { team1Score: null, team2Score: null };
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
       
-      if (team === 'team1') {
-        newScores[round][match].team1Score = score;
-        newScores[round][match].team2Score = score !== null ? 16 - score : null;
-      } else {
-        newScores[round][match].team2Score = score;
-        newScores[round][match].team1Score = score !== null ? 16 - score : null;
+      // Show install prompt after 3 seconds
+      setTimeout(() => {
+        installPrompt.style.display = 'block';
+      }, 3000);
+    });
+    
+    installYes.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
       }
-      return newScores;
-    });
-  };
-
-  const clearMatchScore = (round, match) => {
-    setMatchScores(prev => {
-      const newScores = { ...prev };
-      if (newScores[round] && newScores[round][match]) {
-        newScores[round][match] = { team1Score: null, team2Score: null };
-      }
-      return newScores;
-    });
-  };
-
-  const getTierColor = (playerNum) => {
-    const tierColors = ['#DC2626', '#EA580C', '#CA8A04', '#16A34A', '#2563EB', '#7C3AED'];
-    const tierIndex = Math.floor((playerNum - 1) / 4);
-    return tierColors[tierIndex] || '#6B7280';
-  };
-
-  const getTierName = (playerNum) => {
-    const tierNames = ['Elite', 'Advanced', 'Intermediate+', 'Intermediate', 'Beginner+', 'Beginner'];
-    const tierIndex = Math.floor((playerNum - 1) / 4);
-    return tierNames[tierIndex] || 'Unranked';
-  };
-
-  function PlayerBadge({ playerNum, isPartnership = false, showRating = false }) {
-    return (
-      <div className={`${isPartnership ? 'mr-1' : 'mx-1'} transition-all duration-200 hover:shadow-lg`}>
-        <span 
-          className="inline-block px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold"
-          style={{ backgroundColor: getTierColor(playerNum), color: 'white' }}
-          title={`Rank ${playerNum} - ${getTierName(playerNum)} - Rating: ${skillRatings[playerNum]}`}
-        >
-          {playerNames[playerNum - 1]}
-        </span>
-        {showRating && (
-          <div className="text-xs text-gray-500 text-center mt-1">
-            {skillRatings[playerNum]}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function MatchDisplay({ match, matchIndex }) {
-    const [team1Player1, team1Player2, team2Player1, team2Player2] = match;
-    const getGroup = (player) => Math.ceil(player / 4);
-    const team1Groups = [getGroup(team1Player1), getGroup(team1Player2)];
-    const team2Groups = [getGroup(team2Player1), getGroup(team2Player2)];
-    const isIntraGroup = team1Groups[0] === team1Groups[1] && team2Groups[0] === team2Groups[1];
-    const matchType = isIntraGroup ? 'Within Group' : 'Cross Group';
-    const borderColor = isIntraGroup ? 'border-purple-500' : 'border-green-500';
-    
-    const currentRound = filterRound !== 'all' ? parseInt(filterRound) : selectedRound;
-    const currentScores = matchScores[currentRound]?.[matchIndex + 1] || { team1Score: null, team2Score: null };
-    const isMatchComplete = currentScores.team1Score !== null && currentScores.team2Score !== null;
-    
-    const team1Rating = (skillRatings[team1Player1] + skillRatings[team1Player2]).toFixed(2);
-    const team2Rating = (skillRatings[team2Player1] + skillRatings[team2Player2]).toFixed(2);
-    
-    return (
-      <div className={`bg-white rounded-lg shadow-md p-3 border-l-4 ${borderColor} hover:shadow-lg transition-shadow duration-200 ${isMatchComplete ? 'bg-green-50' : ''} w-full`}>
-        <div className="flex justify-between items-start mb-3">
-          <div className="font-semibold text-gray-700 text-sm">Match {matchIndex + 1}</div>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <span className={`text-xs px-2 py-1 rounded-full ${isIntraGroup ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
-              <span className="hidden sm:inline">{matchType}</span>
-              <span className="sm:hidden">{isIntraGroup ? 'WG' : 'CG'}</span>
-            </span>
-            {isMatchComplete && (
-              <span className="text-xs px-2 py-1 rounded-full bg-green-200 text-green-800">
-                <span className="hidden sm:inline">Complete</span>
-                <span className="sm:hidden">✓</span>
-              </span>
-            )}
-          </div>
-        </div>
-        
-        <div className="mb-3">
-          <div className="flex flex-wrap items-center gap-1 mb-1">
-            <PlayerBadge playerNum={team1Player1} isPartnership={true} />
-            <PlayerBadge playerNum={team1Player2} isPartnership={true} />
-          </div>
-          <div className="text-xs text-gray-500">
-            Groups: {team1Groups.join(', ')} | Total: {team1Rating}
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <input
-            type="number"
-            min="0"
-            max="16"
-            value={currentScores.team1Score || ''}
-            onChange={(e) => handleScoreChange(currentRound, matchIndex + 1, 'team1', e.target.value)}
-            className="w-12 h-8 sm:w-14 sm:h-10 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="0"
-          />
-          <span className="text-lg font-bold text-gray-600">-</span>
-          <input
-            type="number"
-            min="0"
-            max="16"
-            value={currentScores.team2Score || ''}
-            onChange={(e) => handleScoreChange(currentRound, matchIndex + 1, 'team2', e.target.value)}
-            className="w-12 h-8 sm:w-14 sm:h-10 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="0"
-          />
-          {isMatchComplete && (
-            <button
-              onClick={() => clearMatchScore(currentRound, matchIndex + 1)}
-              className="ml-1 text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-600 flex-shrink-0"
-              title="Clear score"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-        
-        <div className="mb-3">
-          <div className="flex flex-wrap items-center gap-1 mb-1">
-            <PlayerBadge playerNum={team2Player1} isPartnership={true} />
-            <PlayerBadge playerNum={team2Player2} isPartnership={true} />
-          </div>
-          <div className="text-xs text-gray-500">
-            Groups: {team2Groups.join(', ')} | Total: {team2Rating}
-          </div>
-        </div>
-        
-        {isMatchComplete && (
-          <div className="text-center text-sm">
-            {currentScores.team1Score > currentScores.team2Score ? (
-              <span className="text-green-600 font-semibold">
-                🏆 <span className="hidden sm:inline">{playerNames[team1Player1 - 1]} & {playerNames[team1Player2 - 1]} Win!</span>
-                <span className="sm:hidden">Team 1 Wins!</span>
-              </span>
-            ) : currentScores.team2Score > currentScores.team1Score ? (
-              <span className="text-green-600 font-semibold">
-                🏆 <span className="hidden sm:inline">{playerNames[team2Player1 - 1]} & {playerNames[team2Player2 - 1]} Win!</span>
-                <span className="sm:hidden">Team 2 Wins!</span>
-              </span>
-            ) : (
-              <span className="text-blue-600 font-semibold">🤝 Tie Game!</span>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function ResultsTab() {
-    const playerStats = {};
-    
-    for (let i = 1; i <= 24; i++) {
-      playerStats[i] = {
-        matches: 0, wins: 0, losses: 0, draws: 0, points: 0, pointsFor: 0, pointsAgainst: 0, partnerships: new Set()
-      };
-    }
-    
-    fixtures.forEach((round, roundIndex) => {
-      const roundNum = roundIndex + 1;
-      round.forEach((match, matchIndex) => {
-        const matchNum = matchIndex + 1;
-        const scores = matchScores[roundNum]?.[matchNum];
-        
-        if (scores && scores.team1Score !== null && scores.team2Score !== null) {
-          const [team1p1, team1p2, team2p1, team2p2] = match;
-          const team1Score = scores.team1Score;
-          const team2Score = scores.team2Score;
-          
-          [team1p1, team1p2, team2p1, team2p2].forEach(player => {
-            playerStats[player].matches++;
-          });
-          
-          playerStats[team1p1].pointsFor += team1Score;
-          playerStats[team1p1].pointsAgainst += team2Score;
-          playerStats[team1p2].pointsFor += team1Score;
-          playerStats[team1p2].pointsAgainst += team2Score;
-          playerStats[team2p1].pointsFor += team2Score;
-          playerStats[team2p1].pointsAgainst += team1Score;
-          playerStats[team2p2].pointsFor += team2Score;
-          playerStats[team2p2].pointsAgainst += team1Score;
-          
-          if (team1Score > team2Score) {
-            playerStats[team1p1].wins++;
-            playerStats[team1p2].wins++;
-            playerStats[team2p1].losses++;
-            playerStats[team2p2].losses++;
-            playerStats[team1p1].points += 3;
-            playerStats[team1p2].points += 3;
-          } else if (team2Score > team1Score) {
-            playerStats[team2p1].wins++;
-            playerStats[team2p2].wins++;
-            playerStats[team1p1].losses++;
-            playerStats[team1p2].losses++;
-            playerStats[team2p1].points += 3;
-            playerStats[team2p2].points += 3;
-          } else {
-            playerStats[team1p1].draws++;
-            playerStats[team1p2].draws++;
-            playerStats[team2p1].draws++;
-            playerStats[team2p2].draws++;
-            playerStats[team1p1].points += 1;
-            playerStats[team1p2].points += 1;
-            playerStats[team2p1].points += 1;
-            playerStats[team2p2].points += 1;
-          }
-          
-          playerStats[team1p1].partnerships.add(team1p2);
-          playerStats[team1p2].partnerships.add(team1p1);
-          playerStats[team2p1].partnerships.add(team2p2);
-          playerStats[team2p2].partnerships.add(team2p1);
-        }
-      });
+      installPrompt.style.display = 'none';
     });
     
-    const sortedPlayers = Object.entries(playerStats)
-      .map(([player, stats]) => ({
-        player: parseInt(player), ...stats,
-        winRate: stats.matches > 0 ? (stats.wins / stats.matches * 100).toFixed(1) : '0.0',
-        pointsDiff: stats.pointsFor - stats.pointsAgainst,
-        partnershipCount: stats.partnerships.size
-      }))
-      .sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
-        return b.pointsFor - a.pointsFor;
-      });
-    
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Player Standings</h2>
-        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">Tournament Point System</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-blue-700">
-            <div><strong>Win:</strong> 3 points</div>
-            <div><strong>Draw:</strong> 1 point</div>
-            <div><strong>Loss:</strong> 0 points</div>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b-2 border-gray-200">
-                <th className="text-left py-2 px-3">Rank</th>
-                <th className="text-left py-2 px-3">Player</th>
-                <th className="text-center py-2 px-3">Points</th>
-                <th className="text-center py-2 px-3">Matches</th>
-                <th className="text-center py-2 px-3">Wins</th>
-                <th className="text-center py-2 px-3">Draws</th>
-                <th className="text-center py-2 px-3">Losses</th>
-                <th className="text-center py-2 px-3">Win Rate</th>
-                <th className="text-center py-2 px-3">For</th>
-                <th className="text-center py-2 px-3">Against</th>
-                <th className="text-center py-2 px-3">Diff</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedPlayers.map((playerData, index) => (
-                <tr key={playerData.player} className={`border-b ${index < 3 ? 'bg-yellow-50' : ''}`}>
-                  <td className="py-2 px-3 font-semibold">
-                    {index + 1}
-                    {index === 0 && ' 🥇'}
-                    {index === 1 && ' 🥈'}
-                    {index === 2 && ' 🥉'}
-                  </td>
-                  <td className="py-2 px-3">
-                    <PlayerBadge playerNum={playerData.player} />
-                  </td>
-                  <td className="text-center py-2 px-3 font-bold text-lg text-blue-600">{playerData.points}</td>
-                  <td className="text-center py-2 px-3">{playerData.matches}</td>
-                  <td className="text-center py-2 px-3 text-green-600 font-semibold">{playerData.wins}</td>
-                  <td className="text-center py-2 px-3 text-yellow-600">{playerData.draws}</td>
-                  <td className="text-center py-2 px-3 text-red-600">{playerData.losses}</td>
-                  <td className="text-center py-2 px-3">{playerData.winRate}%</td>
-                  <td className="text-center py-2 px-3">{playerData.pointsFor}</td>
-                  <td className="text-center py-2 px-3">{playerData.pointsAgainst}</td>
-                  <td className={`text-center py-2 px-3 font-semibold ${
-                    playerData.pointsDiff > 0 ? 'text-green-600' : 
-                    playerData.pointsDiff < 0 ? 'text-red-600' : 'text-gray-600'
-                  }`}>
-                    {playerData.pointsDiff > 0 ? '+' : ''}{playerData.pointsDiff}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  }
-
-  function FairnessTab() {
-    const playerFairness = {};
-    
-    for (let i = 1; i <= 24; i++) {
-      playerFairness[i] = {
-        rounds: [],
-        totalDiff: 0,
-        avgDiff: 0,
-        hardestRound: null,
-        easiestRound: null
-      };
-    }
-    
-    fixtures.forEach((round, roundIndex) => {
-      const roundNum = roundIndex + 1;
-      round.forEach((match) => {
-        const [team1p1, team1p2, team2p1, team2p2] = match;
-        
-        const team1Rating = skillRatings[team1p1] + skillRatings[team1p2];
-        const team2Rating = skillRatings[team2p1] + skillRatings[team2p2];
-        
-        const team1Fairness = (team1Rating - team2Rating).toFixed(2);
-        const team2Fairness = (team2Rating - team1Rating).toFixed(2);
-        
-        playerFairness[team1p1].rounds.push({ round: roundNum, fairness: parseFloat(team1Fairness) });
-        playerFairness[team1p2].rounds.push({ round: roundNum, fairness: parseFloat(team1Fairness) });
-        playerFairness[team2p1].rounds.push({ round: roundNum, fairness: parseFloat(team2Fairness) });
-        playerFairness[team2p2].rounds.push({ round: roundNum, fairness: parseFloat(team2Fairness) });
-        
-        playerFairness[team1p1].totalDiff += parseFloat(team1Fairness);
-        playerFairness[team1p2].totalDiff += parseFloat(team1Fairness);
-        playerFairness[team2p1].totalDiff += parseFloat(team2Fairness);
-        playerFairness[team2p2].totalDiff += parseFloat(team2Fairness);
-      });
+    installNo.addEventListener('click', () => {
+      installPrompt.style.display = 'none';
     });
-    
-    Object.keys(playerFairness).forEach(player => {
-      const data = playerFairness[player];
-      data.avgDiff = (data.totalDiff / data.rounds.length).toFixed(2);
-      
-      const sortedRounds = [...data.rounds].sort((a, b) => a.fairness - b.fairness);
-      data.hardestRound = sortedRounds[0];
-      data.easiestRound = sortedRounds[sortedRounds.length - 1];
-    });
-    
-    const sortedPlayers = Object.entries(playerFairness)
-      .map(([player, data]) => ({ player: parseInt(player), ...data }))
-      .sort((a, b) => a.totalDiff - b.totalDiff);
-    
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Fairness Analysis</h2>
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">How Fairness is Calculated</h4>
-            <div className="text-sm text-blue-700 space-y-2">
-              <p><strong>Fairness Score = Your Team Rating - Opponent Team Rating</strong></p>
-              <ul className="list-disc ml-5 space-y-1">
-                <li><strong>Negative score:</strong> You faced harder opponents (tougher match)</li>
-                <li><strong>Positive score:</strong> You faced easier opponents (easier match)</li>
-                <li><strong>Zero score:</strong> Perfectly balanced match</li>
-              </ul>
-              <p className="mt-2">Lower total fairness = harder schedule overall</p>
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-2 px-3">Player</th>
-                  <th className="text-center py-2 px-3">Rating</th>
-                  <th className="text-center py-2 px-3">Total Fairness</th>
-                  <th className="text-center py-2 px-3">Avg Fairness</th>
-                  <th className="text-center py-2 px-3">Hardest Round</th>
-                  <th className="text-center py-2 px-3">Easiest Round</th>
-                  <th className="text-left py-2 px-3">All Rounds</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedPlayers.map((playerData) => (
-                  <tr key={playerData.player} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-3">
-                      <PlayerBadge playerNum={playerData.player} />
-                    </td>
-                    <td className="text-center py-2 px-3 text-gray-600">
-                      {skillRatings[playerData.player]}
-                    </td>
-                    <td className={`text-center py-2 px-3 font-bold ${
-                      playerData.totalDiff < 0 ? 'text-red-600' : 
-                      playerData.totalDiff > 0 ? 'text-green-600' : 'text-gray-600'
-                    }`}>
-                      {playerData.totalDiff > 0 ? '+' : ''}{playerData.totalDiff.toFixed(2)}
-                    </td>
-                    <td className={`text-center py-2 px-3 font-semibold ${
-                      playerData.avgDiff < 0 ? 'text-red-600' : 
-                      playerData.avgDiff > 0 ? 'text-green-600' : 'text-gray-600'
-                    }`}>
-                      {playerData.avgDiff > 0 ? '+' : ''}{playerData.avgDiff}
-                    </td>
-                    <td className="text-center py-2 px-3">
-                      <span className="text-red-600 font-semibold">
-                        R{playerData.hardestRound.round}: {playerData.hardestRound.fairness.toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="text-center py-2 px-3">
-                      <span className="text-green-600 font-semibold">
-                        R{playerData.easiestRound.round}: {playerData.easiestRound.fairness > 0 ? '+' : ''}{playerData.easiestRound.fairness.toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3">
-                      <div className="flex flex-wrap gap-1">
-                        {playerData.rounds.map((r, idx) => (
-                          <span 
-                            key={idx}
-                            className={`text-xs px-1.5 py-0.5 rounded ${
-                              r.fairness < -0.5 ? 'bg-red-200 text-red-800' :
-                              r.fairness < 0 ? 'bg-red-100 text-red-700' :
-                              r.fairness === 0 ? 'bg-gray-200 text-gray-700' :
-                              r.fairness < 0.5 ? 'bg-green-100 text-green-700' :
-                              'bg-green-200 text-green-800'
-                            }`}
-                            title={`Round ${r.round}: ${r.fairness > 0 ? '+' : ''}${r.fairness.toFixed(2)}`}
-                          >
-                            {r.fairness > 0 ? '+' : ''}{r.fairness.toFixed(1)}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Fairness Distribution</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-red-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {sortedPlayers.filter(p => p.totalDiff < -1).length}
-              </div>
-              <div className="text-sm text-red-700">Players with Harder Schedule</div>
-              <div className="text-xs text-red-600">(Total Fairness &lt; -1)</div>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-gray-600">
-                {sortedPlayers.filter(p => p.totalDiff >= -1 && p.totalDiff <= 1).length}
-              </div>
-              <div className="text-sm text-gray-700">Players with Balanced Schedule</div>
-              <div className="text-xs text-gray-600">(-1 to +1)</div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {sortedPlayers.filter(p => p.totalDiff > 1).length}
-              </div>
-              <div className="text-sm text-green-700">Players with Easier Schedule</div>
-              <div className="text-xs text-green-600">(Total Fairness &gt; +1)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function Fairness2Tab() {
-    const playerFairness = {};
-    
-    for (let i = 1; i <= 24; i++) {
-      playerFairness[i] = {
-        rounds: [],
-        totalDiff: 0,
-        avgDiff: 0,
-        hardestRound: null,
-        easiestRound: null
-      };
-    }
-    
-    fixtures.forEach((round, roundIndex) => {
-      const roundNum = roundIndex + 1;
-      round.forEach((match) => {
-        const [team1p1, team1p2, team2p1, team2p2] = match;
-        
-        const avgOpponents1 = ((skillRatings[team2p1] + skillRatings[team2p2]) / 2).toFixed(2);
-        const avgOpponents2 = ((skillRatings[team1p1] + skillRatings[team1p2]) / 2).toFixed(2);
-        
-        const team1p1Fairness = (skillRatings[team1p2] - avgOpponents1).toFixed(2);
-        const team1p2Fairness = (skillRatings[team1p1] - avgOpponents1).toFixed(2);
-        const team2p1Fairness = (skillRatings[team2p2] - avgOpponents2).toFixed(2);
-        const team2p2Fairness = (skillRatings[team2p1] - avgOpponents2).toFixed(2);
-        
-        playerFairness[team1p1].rounds.push({ 
-          round: roundNum, 
-          fairness: parseFloat(team1p1Fairness),
-          partner: team1p2,
-          opponents: [team2p1, team2p2]
-        });
-        playerFairness[team1p2].rounds.push({ 
-          round: roundNum, 
-          fairness: parseFloat(team1p2Fairness),
-          partner: team1p1,
-          opponents: [team2p1, team2p2]
-        });
-        playerFairness[team2p1].rounds.push({ 
-          round: roundNum, 
-          fairness: parseFloat(team2p1Fairness),
-          partner: team2p2,
-          opponents: [team1p1, team1p2]
-        });
-        playerFairness[team2p2].rounds.push({ 
-          round: roundNum, 
-          fairness: parseFloat(team2p2Fairness),
-          partner: team2p1,
-          opponents: [team1p1, team1p2]
-        });
-        
-        playerFairness[team1p1].totalDiff += parseFloat(team1p1Fairness);
-        playerFairness[team1p2].totalDiff += parseFloat(team1p2Fairness);
-        playerFairness[team2p1].totalDiff += parseFloat(team2p1Fairness);
-        playerFairness[team2p2].totalDiff += parseFloat(team2p2Fairness);
-      });
-    });
-    
-    Object.keys(playerFairness).forEach(player => {
-      const data = playerFairness[player];
-      data.avgDiff = (data.totalDiff / data.rounds.length).toFixed(2);
-      
-      const sortedRounds = [...data.rounds].sort((a, b) => a.fairness - b.fairness);
-      data.hardestRound = sortedRounds[0];
-      data.easiestRound = sortedRounds[sortedRounds.length - 1];
-    });
-    
-    const sortedPlayers = Object.entries(playerFairness)
-      .map(([player, data]) => ({ player: parseInt(player), ...data }))
-      .sort((a, b) => a.totalDiff - b.totalDiff);
-    
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Fairness Analysis 2: Partner Quality vs Opponent Difficulty</h2>
-          <div className="mb-4 p-4 bg-purple-50 rounded-lg">
-            <h4 className="font-semibold text-purple-800 mb-2">How Fairness 2 is Calculated</h4>
-            <div className="text-sm text-purple-700 space-y-2">
-              <p><strong>Fairness Score = Your Partner's Rating - Average Opponent Rating</strong></p>
-              <ul className="list-disc ml-5 space-y-1">
-                <li><strong>Negative score:</strong> Your partner is weaker than the average opponent (harder match for you)</li>
-                <li><strong>Positive score:</strong> Your partner is stronger than the average opponent (easier match for you)</li>
-                <li><strong>Zero score:</strong> Your partner's strength balances the opponent difficulty</li>
-              </ul>
-              <p className="mt-2">This metric shows if you were given strong partners to compensate for tough opponents, or vice versa</p>
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-2 px-3">Player</th>
-                  <th className="text-center py-2 px-3">Rating</th>
-                  <th className="text-center py-2 px-3">Total Fairness</th>
-                  <th className="text-center py-2 px-3">Avg Fairness</th>
-                  <th className="text-center py-2 px-3">Hardest Round</th>
-                  <th className="text-center py-2 px-3">Easiest Round</th>
-                  <th className="text-left py-2 px-3">All Rounds</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedPlayers.map((playerData) => (
-                  <tr key={playerData.player} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-3">
-                      <PlayerBadge playerNum={playerData.player} />
-                    </td>
-                    <td className="text-center py-2 px-3 text-gray-600">
-                      {skillRatings[playerData.player]}
-                    </td>
-                    <td className={`text-center py-2 px-3 font-bold ${
-                      playerData.totalDiff < 0 ? 'text-red-600' : 
-                      playerData.totalDiff > 0 ? 'text-green-600' : 'text-gray-600'
-                    }`}>
-                      {playerData.totalDiff > 0 ? '+' : ''}{playerData.totalDiff.toFixed(2)}
-                    </td>
-                    <td className={`text-center py-2 px-3 font-semibold ${
-                      playerData.avgDiff < 0 ? 'text-red-600' : 
-                      playerData.avgDiff > 0 ? 'text-green-600' : 'text-gray-600'
-                    }`}>
-                      {playerData.avgDiff > 0 ? '+' : ''}{playerData.avgDiff}
-                    </td>
-                    <td className="text-center py-2 px-3">
-                      <div className="text-xs">
-                        <span className="text-red-600 font-semibold block">
-                          R{playerData.hardestRound.round}: {playerData.hardestRound.fairness.toFixed(2)}
-                        </span>
-                        <span className="text-gray-500 text-xs">
-                          Partner: {playerNames[playerData.hardestRound.partner - 1].split(' ')[0]}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="text-center py-2 px-3">
-                      <div className="text-xs">
-                        <span className="text-green-600 font-semibold block">
-                          R{playerData.easiestRound.round}: {playerData.easiestRound.fairness > 0 ? '+' : ''}{playerData.easiestRound.fairness.toFixed(2)}
-                        </span>
-                        <span className="text-gray-500 text-xs">
-                          Partner: {playerNames[playerData.easiestRound.partner - 1].split(' ')[0]}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-2 px-3">
-                      <div className="flex flex-wrap gap-1">
-                        {playerData.rounds.map((r, idx) => (
-                          <span 
-                            key={idx}
-                            className={`text-xs px-1.5 py-0.5 rounded ${
-                              r.fairness < -0.5 ? 'bg-red-200 text-red-800' :
-                              r.fairness < 0 ? 'bg-red-100 text-red-700' :
-                              r.fairness === 0 ? 'bg-gray-200 text-gray-700' :
-                              r.fairness < 0.5 ? 'bg-green-100 text-green-700' :
-                              'bg-green-200 text-green-800'
-                            }`}
-                            title={`Round ${r.round}: Partner ${playerNames[r.partner - 1]} (${skillRatings[r.partner]}) vs Avg Opp ${((skillRatings[r.opponents[0]] + skillRatings[r.opponents[1]]) / 2).toFixed(2)} = ${r.fairness > 0 ? '+' : ''}${r.fairness.toFixed(2)}`}
-                          >
-                            {r.fairness > 0 ? '+' : ''}{r.fairness.toFixed(1)}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Fairness 2 Distribution</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-red-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {sortedPlayers.filter(p => p.totalDiff < -1).length}
-              </div>
-              <div className="text-sm text-red-700">Players with Weaker Partners</div>
-              <div className="text-xs text-red-600">(vs opponent strength)</div>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-gray-600">
-                {sortedPlayers.filter(p => p.totalDiff >= -1 && p.totalDiff <= 1).length}
-              </div>
-              <div className="text-sm text-gray-700">Players with Balanced Partnership</div>
-              <div className="text-xs text-gray-600">(-1 to +1)</div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {sortedPlayers.filter(p => p.totalDiff > 1).length}
-              </div>
-              <div className="text-sm text-green-700">Players with Stronger Partners</div>
-              <div className="text-xs text-green-600">(vs opponent strength)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function PartnershipsTab() {
-    const partnerships = Array(25).fill(null).map(() => Array(25).fill(0));
-    const opponents = Array(25).fill(null).map(() => Array(25).fill(0));
-
-    fixtures.forEach((round) => {
-      round.forEach((match) => {
-        const [p1, p2, p3, p4] = match;
-        partnerships[p1][p2]++;
-        partnerships[p2][p1]++;
-        partnerships[p3][p4]++;
-        partnerships[p4][p3]++;
-        [p1, p2].forEach(player1 => {
-          [p3, p4].forEach(player2 => {
-            opponents[player1][player2]++;
-            opponents[player2][player1]++;
-          });
-        });
-      });
-    });
-
-    let totalPartnerships = 0;
-    let uniquePartnerships = 0;
-    let totalOpponents = 0;
-    let uniqueOpponents = 0;
-
-    for (let i = 1; i <= 24; i++) {
-      for (let j = i + 1; j <= 24; j++) {
-        if (partnerships[i][j] > 0) {
-          uniquePartnerships++;
-          totalPartnerships += partnerships[i][j];
-        }
-        if (opponents[i][j] > 0) {
-          uniqueOpponents++;
-          totalOpponents += opponents[i][j];
-        }
-      }
-    }
-
-    const partnershipCoverage = ((uniquePartnerships / (24 * 23 / 2)) * 100).toFixed(1);
-    const opponentCoverage = ((uniqueOpponents / (24 * 23 / 2)) * 100).toFixed(1);
-
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Partnership & Opponent Analysis</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-blue-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-blue-600">{totalPartnerships}</div>
-              <div className="text-sm text-blue-700">Total Partnerships</div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-green-600">{uniquePartnerships}</div>
-              <div className="text-sm text-green-700">Unique Partnerships</div>
-              <div className="text-xs text-green-600">({partnershipCoverage}% coverage)</div>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-purple-600">{totalOpponents}</div>
-              <div className="text-sm text-purple-700">Total Opponent Matches</div>
-            </div>
-            <div className="bg-orange-50 p-4 rounded-lg text-center">
-              <div className="text-2xl font-bold text-orange-600">{uniqueOpponents}</div>
-              <div className="text-sm text-orange-700">Unique Opponent Pairs</div>
-              <div className="text-xs text-orange-600">({opponentCoverage}% coverage)</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Partnership Frequency Matrix</h2>
-          <div className="text-sm text-gray-600 mb-4">
-            Numbers show how many times each pair partners together across all 13 rounds.
-          </div>
-          <div className="overflow-x-auto">
-            <table className="border-collapse border border-gray-400 min-w-full">
-              <thead>
-                <tr>
-                  <th className="border border-gray-400 bg-gray-100 w-24 h-12 p-1 text-xs font-bold sticky left-0 z-10">
-                    Player
-                  </th>
-                  {playerNames.map((name, i) => (
-                    <th key={i} className="border border-gray-400 bg-gray-100 w-8 h-12 p-1 text-xs font-bold text-center">
-                      <div className="transform -rotate-90 whitespace-nowrap text-xs">
-                        {i + 1}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {playerNames.map((name, i) => (
-                  <tr key={i}>
-                    <td className="border border-gray-400 bg-gray-50 w-24 h-8 p-1 text-xs font-bold sticky left-0 z-10">
-                      {i + 1}. {name.length > 8 ? name.substring(0, 8) + '...' : name}
-                    </td>
-                    {playerNames.map((_, j) => {
-                      const freq = partnerships[i + 1][j + 1];
-                      const isSelf = i === j;
-                      
-                      return (
-                        <td key={j} className={`border border-gray-400 w-8 h-8 p-0 text-center text-xs font-bold ${
-                          isSelf ? 'bg-gray-300' : 
-                          freq === 1 ? 'bg-blue-200 text-blue-900' : 
-                          freq === 2 ? 'bg-green-200 text-green-900' : 
-                          freq >= 3 ? 'bg-red-200 text-red-900' :
-                          'bg-white'
-                        }`}>
-                          {isSelf ? '-' : freq > 0 ? freq : ''}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-3 flex gap-4 text-xs">
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-blue-200 border border-gray-400"></div>
-              <span>1 Partnership</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-green-200 border border-gray-400"></div>
-              <span>2 Partnerships</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-red-200 border border-gray-400"></div>
-              <span>3+ Partnerships</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Opponent Frequency Matrix</h2>
-          <div className="text-sm text-gray-600 mb-4">
-            Numbers show how many times each pair faces as opponents across all 13 rounds.
-          </div>
-          <div className="overflow-x-auto">
-            <table className="border-collapse border border-gray-400 min-w-full">
-              <thead>
-                <tr>
-                  <th className="border border-gray-400 bg-gray-100 w-24 h-12 p-1 text-xs font-bold sticky left-0 z-10">
-                    Player
-                  </th>
-                  {playerNames.map((name, i) => (
-                    <th key={i} className="border border-gray-400 bg-gray-100 w-8 h-12 p-1 text-xs font-bold text-center">
-                      <div className="transform -rotate-90 whitespace-nowrap text-xs">
-                        {i + 1}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {playerNames.map((name, i) => (
-                  <tr key={i}>
-                    <td className="border border-gray-400 bg-gray-50 w-24 h-8 p-1 text-xs font-bold sticky left-0 z-10">
-                      {i + 1}. {name.length > 8 ? name.substring(0, 8) + '...' : name}
-                    </td>
-                    {playerNames.map((_, j) => {
-                      const freq = opponents[i + 1][j + 1];
+  </script>
+</body>
+</html>
