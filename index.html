@@ -877,87 +877,153 @@
             }
         }
 
-        // Generate all 13 rounds of matches
+        // Generate all 13 rounds of matches using predefined fixture
         function generateMatches() {
             matches = [];
             
-            // Round 1-4: Within-group matches
-            for (let round = 1; round <= 4; round++) {
-                for (let group = 1; group <= 6; group++) {
-                    const groupPlayers = players.filter(p => p.group === group);
-                    const pairs = getWithinGroupPairs(groupPlayers, round);
-                    
-                    pairs.forEach(pair => {
-                        matches.push({
-                            round: round,
-                            team1: [pair[0], pair[1]],
-                            team2: [pair[2], pair[3]],
-                            score1: null,
-                            score2: null,
-                            type: 'within'
-                        });
-                    });
-                }
-            }
+            // Predefined fixture for all 13 rounds
+            const fixture = [
+                // ROUND 1
+                [
+                    [[1, 4], [2, 3]],
+                    [[5, 8], [6, 7]],
+                    [[9, 12], [10, 11]],
+                    [[13, 16], [14, 15]],
+                    [[17, 20], [18, 19]],
+                    [[21, 24], [22, 23]]
+                ],
+                // ROUND 2
+                [
+                    [[1, 24], [10, 16]],
+                    [[2, 23], [6, 19]],
+                    [[3, 22], [7, 18]],
+                    [[4, 21], [8, 17]],
+                    [[5, 20], [13, 12]],
+                    [[11, 15], [14, 9]]
+                ],
+                // ROUND 3
+                [
+                    [[1, 10], [9, 4]],
+                    [[2, 11], [12, 3]],
+                    [[5, 18], [13, 8]],
+                    [[6, 17], [14, 7]],
+                    [[15, 24], [19, 20]],
+                    [[16, 23], [22, 21]]
+                ],
+                // ROUND 4
+                [
+                    [[1, 21], [17, 2]],
+                    [[4, 19], [18, 3]],
+                    [[5, 12], [9, 8]],
+                    [[6, 11], [10, 7]],
+                    [[13, 24], [20, 16]],
+                    [[14, 23], [22, 15]]
+                ],
+                // ROUND 5
+                [
+                    [[4, 14], [13, 1]],
+                    [[2, 16], [15, 3]],
+                    [[6, 24], [21, 10]],
+                    [[5, 23], [11, 7]],
+                    [[8, 22], [17, 12]],
+                    [[9, 19], [18, 20]]
+                ],
+                // ROUND 6
+                [
+                    [[1, 12], [5, 4]],
+                    [[2, 7], [6, 3]],
+                    [[9, 20], [21, 8]],
+                    [[10, 23], [22, 11]],
+                    [[13, 24], [17, 18]],
+                    [[14, 19], [16, 15]]
+                ],
+                // ROUND 7
+                [
+                    [[2, 24], [5, 20]],
+                    [[4, 23], [6, 19]],
+                    [[1, 22], [7, 18]],
+                    [[3, 21], [8, 17]],
+                    [[15, 16], [13, 12]],
+                    [[9, 11], [14, 10]]
+                ],
+                // ROUND 8
+                [
+                    [[5, 12], [9, 4]],
+                    [[1, 13], [8, 2]],
+                    [[6, 16], [11, 10]],
+                    [[3, 17], [14, 7]],
+                    [[21, 19], [23, 20]],
+                    [[22, 18], [15, 24]]
+                ],
+                // ROUND 9
+                [
+                    [[2, 24], [17, 4]],
+                    [[1, 19], [18, 3]],
+                    [[6, 12], [11, 8]],
+                    [[5, 9], [10, 7]],
+                    [[14, 20], [21, 16]],
+                    [[13, 23], [22, 15]]
+                ],
+                // ROUND 10
+                [
+                    [[2, 23], [15, 5]],
+                    [[1, 22], [4, 20]],
+                    [[8, 7], [9, 18]],
+                    [[12, 14], [19, 13]],
+                    [[3, 24], [10, 17]],
+                    [[11, 16], [6, 21]]
+                ],
+                // ROUND 11
+                [
+                    [[12, 22], [16, 20]],
+                    [[1, 23], [6, 11]],
+                    [[2, 9], [7, 8]],
+                    [[3, 21], [5, 13]],
+                    [[10, 18], [14, 15]],
+                    [[24, 4], [19, 17]]
+                ],
+                // ROUND 12
+                [
+                    [[2, 16], [13, 4]],
+                    [[5, 17], [14, 1]],
+                    [[6, 24], [21, 8]],
+                    [[3, 22], [15, 7]],
+                    [[10, 18], [23, 12]],
+                    [[9, 19], [20, 11]]
+                ],
+                // ROUND 13
+                [
+                    [[2, 8], [5, 4]],
+                    [[3, 7], [6, 1]],
+                    [[10, 24], [21, 12]],
+                    [[9, 23], [15, 11]],
+                    [[14, 20], [17, 16]],
+                    [[13, 19], [18, 22]]
+                ]
+            ];
             
-            // Round 5-13: Cross-group matches
-            for (let round = 5; round <= 13; round++) {
-                const roundMatches = getCrossGroupMatches(round);
-                roundMatches.forEach(match => {
+            fixture.forEach((round, roundIndex) => {
+                round.forEach(match => {
+                    const team1Players = match[0].map(id => players.find(p => p.id === id));
+                    const team2Players = match[1].map(id => players.find(p => p.id === id));
+                    
+                    // Determine if match is within-group or cross-group
+                    const team1Groups = team1Players.map(p => p.group);
+                    const team2Groups = team2Players.map(p => p.group);
+                    const allGroups = [...team1Groups, ...team2Groups];
+                    const uniqueGroups = [...new Set(allGroups)];
+                    const isWithinGroup = uniqueGroups.length === 1;
+                    
                     matches.push({
-                        round: round,
-                        team1: match.team1,
-                        team2: match.team2,
+                        round: roundIndex + 1,
+                        team1: team1Players,
+                        team2: team2Players,
                         score1: null,
                         score2: null,
-                        type: 'cross'
+                        type: isWithinGroup ? 'within' : 'cross'
                     });
                 });
-            }
-        }
-
-        function getWithinGroupPairs(groupPlayers, round) {
-            // Rotate pairings within each group
-            const rotations = [
-                [[0, 1, 2, 3]],
-                [[0, 2, 1, 3]],
-                [[0, 3, 1, 2]],
-                [[0, 1, 2, 3]]
-            ];
-            return [rotations[(round - 1) % 4][0].map(i => groupPlayers[i])];
-        }
-
-        function getCrossGroupMatches(round) {
-            const roundMatches = [];
-            const groupCombos = [
-                [1, 2], [3, 4], [5, 6],
-                [1, 3], [2, 4], [5, 6],
-                [1, 4], [2, 3], [5, 6],
-                [1, 5], [2, 6], [3, 4],
-                [1, 6], [2, 5], [3, 4],
-                [1, 2], [3, 5], [4, 6],
-                [1, 3], [2, 5], [4, 6],
-                [1, 4], [2, 6], [3, 5],
-                [1, 5], [2, 3], [4, 6]
-            ];
-            
-            const combo = groupCombos[(round - 5) % 9];
-            
-            for (let i = 0; i < 3; i++) {
-                const g1 = combo[i] || combo[0];
-                const g2 = combo[(i + 1) % 3] || combo[1];
-                
-                const group1Players = players.filter(p => p.group === g1);
-                const group2Players = players.filter(p => p.group === g2);
-                
-                const offset = ((round - 5) * 2 + i) % 4;
-                roundMatches.push({
-                    team1: [group1Players[offset % 4], group1Players[(offset + 1) % 4]],
-                    team2: [group2Players[(offset + 2) % 4], group2Players[(offset + 3) % 4]]
-                });
-            }
-            
-            return roundMatches;
+            });
         }
 
         function getTierClass(player) {
@@ -1450,6 +1516,9 @@
             const table = document.getElementById('fairness1Table');
             const fairnessData = calculateFairness1();
             
+            // Sort from easiest to hardest (highest total to lowest)
+            fairnessData.sort((a, b) => b.total - a.total);
+            
             table.innerHTML = `
                 <thead>
                     <tr>
@@ -1459,7 +1528,7 @@
                         <th>Avg</th>
                         <th>Hardest</th>
                         <th>Easiest</th>
-                        <th>All Rounds</th>
+                        <th style="min-width: 400px;">All Rounds</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1471,11 +1540,12 @@
                                 ${f.total.toFixed(2)}
                             </td>
                             <td>${f.avg.toFixed(2)}</td>
-                            <td>R${f.hardest.round}: ${f.hardest.value.toFixed(2)}</td>
-                            <td>R${f.easiest.round}: ${f.easiest.value.toFixed(2)}</td>
+                            <td style="white-space: nowrap;">R${f.hardest.round}: ${f.hardest.value.toFixed(2)}</td>
+                            <td style="white-space: nowrap;">R${f.easiest.round}: ${f.easiest.value.toFixed(2)}</td>
                             <td style="font-size: 11px;">
-                                ${f.rounds.map(r => `
-                                    <span class="fairness-badge ${r < -0.3 ? 'fairness-negative' : r > 0.3 ? 'fairness-positive' : 'fairness-neutral'}">
+                                ${f.rounds.map((r, i) => `
+                                    <span class="fairness-badge ${r < -0.3 ? 'fairness-negative' : r > 0.3 ? 'fairness-positive' : 'fairness-neutral'}" 
+                                          title="Round ${i+1}: ${r.toFixed(2)}">
                                         ${r.toFixed(1)}
                                     </span>
                                 `).join(' ')}
@@ -1505,10 +1575,14 @@
                     const myTeam = isTeam1 ? match.team1 : match.team2;
                     const opponentTeam = isTeam1 ? match.team2 : match.team1;
                     
-                    const myRating = myTeam.reduce((sum, p) => sum + p.rating, 0);
-                    const opponentRating = opponentTeam.reduce((sum, p) => sum + p.rating, 0);
+                    // My team rating (player + partner)
+                    const myTeamRating = myTeam.reduce((sum, p) => sum + p.rating, 0);
+                    // Opponent team rating (opponent1 + opponent2)
+                    const opponentTeamRating = opponentTeam.reduce((sum, p) => sum + p.rating, 0);
                     
-                    rounds.push(myRating - opponentRating);
+                    // Fairness = My Team Rating - Opponent Team Rating
+                    const fairness = myTeamRating - opponentTeamRating;
+                    rounds.push(fairness);
                 }
                 
                 const total = rounds.reduce((sum, r) => sum + r, 0);
@@ -1524,6 +1598,9 @@
             const table = document.getElementById('fairness2Table');
             const fairnessData = calculateFairness2();
             
+            // Sort from easiest to hardest (highest total to lowest)
+            fairnessData.sort((a, b) => b.total - a.total);
+            
             table.innerHTML = `
                 <thead>
                     <tr>
@@ -1533,7 +1610,7 @@
                         <th>Avg</th>
                         <th>Best Partner</th>
                         <th>Worst Partner</th>
-                        <th>All Rounds</th>
+                        <th style="min-width: 400px;">All Rounds</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1545,11 +1622,12 @@
                                 ${f.total.toFixed(2)}
                             </td>
                             <td>${f.avg.toFixed(2)}</td>
-                            <td>R${f.best.round}: ${f.best.value.toFixed(2)}</td>
-                            <td>R${f.worst.round}: ${f.worst.value.toFixed(2)}</td>
+                            <td style="white-space: nowrap;">R${f.best.round}: ${f.best.value.toFixed(2)}</td>
+                            <td style="white-space: nowrap;">R${f.worst.round}: ${f.worst.value.toFixed(2)}</td>
                             <td style="font-size: 11px;">
-                                ${f.rounds.map(r => `
-                                    <span class="fairness-badge ${r > 0.3 ? 'fairness-negative' : r < -0.3 ? 'fairness-positive' : 'fairness-neutral'}">
+                                ${f.rounds.map((r, i) => `
+                                    <span class="fairness-badge ${r > 0.3 ? 'fairness-positive' : r < -0.3 ? 'fairness-negative' : 'fairness-neutral'}"
+                                          title="Round ${i+1}: ${r.toFixed(2)}">
                                         ${r.toFixed(1)}
                                     </span>
                                 `).join(' ')}
@@ -1579,10 +1657,15 @@
                     const myTeam = isTeam1 ? match.team1 : match.team2;
                     const opponentTeam = isTeam1 ? match.team2 : match.team1;
                     
+                    // Get partner (the other player on my team)
                     const partner = myTeam.find(p => p.id !== player.id);
+                    
+                    // Average opponent rating
                     const avgOpponentRating = opponentTeam.reduce((sum, p) => sum + p.rating, 0) / 2;
                     
-                    rounds.push(partner.rating - avgOpponentRating);
+                    // Fairness = Partner Rating - Avg Opponent Rating
+                    const fairness = partner.rating - avgOpponentRating;
+                    rounds.push(fairness);
                 }
                 
                 const total = rounds.reduce((sum, r) => sum + r, 0);
@@ -1619,8 +1702,8 @@
                 </div>
             `;
             
-            partnershipMatrix.innerHTML = renderMatrix(stats.partnershipMatrix, 'Partnerships');
-            opponentMatrix.innerHTML = renderMatrix(stats.opponentMatrix, 'Opponents');
+            partnershipMatrix.innerHTML = renderPartnershipMatrix(stats.partnershipMatrix);
+            opponentMatrix.innerHTML = renderOpponentMatrix(stats.opponentMatrix);
         }
 
         function calculatePartnershipStats() {
@@ -1628,13 +1711,21 @@
             const opponentMatrix = Array(24).fill(0).map(() => Array(24).fill(0));
             
             matches.forEach(match => {
-                // Partnerships
-                partnershipMatrix[match.team1[0].id - 1][match.team1[1].id - 1]++;
-                partnershipMatrix[match.team1[1].id - 1][match.team1[0].id - 1]++;
-                partnershipMatrix[match.team2[0].id - 1][match.team2[1].id - 1]++;
-                partnershipMatrix[match.team2[1].id - 1][match.team2[0].id - 1]++;
+                // Count partnerships (teammates)
+                const team1p1 = match.team1[0].id - 1;
+                const team1p2 = match.team1[1].id - 1;
+                const team2p1 = match.team2[0].id - 1;
+                const team2p2 = match.team2[1].id - 1;
                 
-                // Opponents
+                // Team 1 partnership
+                partnershipMatrix[team1p1][team1p2]++;
+                partnershipMatrix[team1p2][team1p1]++;
+                
+                // Team 2 partnership
+                partnershipMatrix[team2p1][team2p2]++;
+                partnershipMatrix[team2p2][team2p1]++;
+                
+                // Count opponents (players on opposite teams)
                 match.team1.forEach(p1 => {
                     match.team2.forEach(p2 => {
                         opponentMatrix[p1.id - 1][p2.id - 1]++;
@@ -1661,8 +1752,8 @@
                 }
             }
             
-            const maxPartnerships = (24 * 23) / 2;
-            const maxOpponents = (24 * 23) / 2;
+            const maxPartnerships = (24 * 23) / 2; // 276 possible unique pairs
+            const maxOpponents = (24 * 23) / 2; // 276 possible unique opponent pairs
             
             return {
                 partnershipMatrix,
@@ -1676,12 +1767,12 @@
             };
         }
 
-        function renderMatrix(matrix, type) {
-            let html = '<table class="matrix-table"><tr><th></th>';
+        function renderPartnershipMatrix(matrix) {
+            let html = '<div style="overflow-x: auto;"><table class="matrix-table"><thead><tr><th></th>';
             for (let i = 1; i <= 24; i++) {
                 html += `<th>${i}</th>`;
             }
-            html += '</tr>';
+            html += '</tr></thead><tbody>';
             
             for (let i = 0; i < 24; i++) {
                 html += `<tr><th>${i + 1}</th>`;
@@ -1693,12 +1784,91 @@
                         const cellClass = value === 0 ? 'matrix-cell-0' : 
                                          value === 1 ? 'matrix-cell-1' : 
                                          value === 2 ? 'matrix-cell-2' : 'matrix-cell-3';
-                        html += `<td class="${cellClass}">${value || ''}</td>`;
+                        html += `<td class="${cellClass}" title="Player ${i+1} & Player ${j+1}: ${value} times">${value || ''}</td>`;
                     }
                 }
                 html += '</tr>';
             }
-            html += '</table>';
+            html += '</tbody></table></div>';
+            
+            // Add legend
+            html += `
+                <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; font-size: 13px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #F9FAFB; border: 1px solid #E5E7EB;"></div>
+                        <span>0 partnerships</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #DBEAFE; border: 1px solid #E5E7EB;"></div>
+                        <span>1 partnership</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #BFDBFE; border: 1px solid #E5E7EB;"></div>
+                        <span>2 partnerships</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #93C5FD; border: 1px solid #E5E7EB;"></div>
+                        <span>3+ partnerships</span>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        function renderOpponentMatrix(matrix) {
+            let html = '<div style="overflow-x: auto;"><table class="matrix-table"><thead><tr><th></th>';
+            for (let i = 1; i <= 24; i++) {
+                html += `<th>${i}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            
+            for (let i = 0; i < 24; i++) {
+                html += `<tr><th>${i + 1}</th>`;
+                for (let j = 0; j < 24; j++) {
+                    if (i === j) {
+                        html += '<td style="background: #E5E7EB;">-</td>';
+                    } else {
+                        const value = matrix[i][j];
+                        // Use different coloring for opponent matrix (green tones)
+                        let cellClass = 'matrix-cell-0';
+                        let bgColor = '#F9FAFB';
+                        if (value > 0 && value <= 2) {
+                            bgColor = '#D1FAE5'; // Light green
+                        } else if (value > 2 && value <= 4) {
+                            bgColor = '#A7F3D0'; // Medium green
+                        } else if (value > 4) {
+                            bgColor = '#6EE7B7'; // Dark green
+                        }
+                        html += `<td style="background: ${bgColor};" title="Player ${i+1} vs Player ${j+1}: ${value} times">${value || ''}</td>`;
+                    }
+                }
+                html += '</tr>';
+            }
+            html += '</tbody></table></div>';
+            
+            // Add legend
+            html += `
+                <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; font-size: 13px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #F9FAFB; border: 1px solid #E5E7EB;"></div>
+                        <span>0 matchups</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #D1FAE5; border: 1px solid #E5E7EB;"></div>
+                        <span>1-2 matchups</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #A7F3D0; border: 1px solid #E5E7EB;"></div>
+                        <span>3-4 matchups</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 30px; height: 20px; background: #6EE7B7; border: 1px solid #E5E7EB;"></div>
+                        <span>5+ matchups</span>
+                    </div>
+                </div>
+            `;
+            
             return html;
         }
 
