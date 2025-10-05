@@ -348,6 +348,37 @@
             border-radius: 6px;
             margin-bottom: 10px;
             font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .player-edit-card input:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+        .player-edit-card input.changed {
+            border-color: #F59E0B;
+            background: #FFFBEB;
+        }
+
+        .unsaved-indicator {
+            background: #FEF3C7;
+            border: 2px solid #F59E0B;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .unsaved-indicator.show {
+            display: flex;
+        }
+
+        .unsaved-indicator span {
+            color: #92400E;
+            font-weight: 600;
         }
 
         .info-panel {
@@ -694,9 +725,16 @@
 
         <div id="players" class="tab-content">
             <div class="content-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <h2>Edit Player Names</h2>
-                    <button class="btn btn-danger" onclick="resetAllNames()">Reset All Names</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="savePlayerChanges(event)">💾 Save Changes</button>
+                        <button class="btn btn-danger" onclick="resetAllNames()">Reset All Names</button>
+                    </div>
+                </div>
+                <div id="unsavedIndicator" class="unsaved-indicator">
+                    <span>⚠️</span>
+                    <span>You have unsaved changes. Click "Save Changes" to apply.</span>
                 </div>
                 <div id="playersContainer" class="player-grid"></div>
                 <div class="info-panel">
@@ -705,7 +743,7 @@
                         <li>Players 1-4 are Elite level</li>
                         <li>Players 21-24 are Beginner level</li>
                         <li>Ratings range from 0 to 5</li>
-                        <li>Names appear on all fixtures and results</li>
+                        <li><strong>Click "Save Changes" to apply updates to all pages</strong></li>
                         <li>Use Data Management to save backups</li>
                     </ul>
                 </div>
@@ -845,7 +883,6 @@
     </div>
 
     <script>
-        // Initial tournament data
         let players = [];
         let matches = [];
         let knockoutMatches = {
@@ -859,7 +896,6 @@
             finalPoints: 16
         };
 
-        // Initialize players with default names and ratings
         function initializePlayers() {
             const tierNames = ['Elite', 'Advanced', 'Intermediate+', 'Intermediate', 'Beginner+', 'Beginner'];
             const baseRatings = [3.85, 3.50, 3.15, 2.85, 2.65, 2.50];
@@ -877,129 +913,23 @@
             }
         }
 
-        // Generate all 13 rounds of matches using predefined fixture
         function generateMatches() {
             matches = [];
             
-            // Predefined fixture for all 13 rounds
             const fixture = [
-                // ROUND 1
-                [
-                    [[1, 4], [2, 3]],
-                    [[5, 8], [6, 7]],
-                    [[9, 12], [10, 11]],
-                    [[13, 16], [14, 15]],
-                    [[17, 20], [18, 19]],
-                    [[21, 24], [22, 23]]
-                ],
-                // ROUND 2
-                [
-                    [[1, 24], [10, 16]],
-                    [[2, 23], [6, 19]],
-                    [[3, 22], [7, 18]],
-                    [[4, 21], [8, 17]],
-                    [[5, 20], [13, 12]],
-                    [[11, 15], [14, 9]]
-                ],
-                // ROUND 3
-                [
-                    [[1, 10], [9, 4]],
-                    [[2, 11], [12, 3]],
-                    [[5, 18], [13, 8]],
-                    [[6, 17], [14, 7]],
-                    [[15, 24], [19, 20]],
-                    [[16, 23], [22, 21]]
-                ],
-                // ROUND 4
-                [
-                    [[1, 21], [17, 2]],
-                    [[4, 19], [18, 3]],
-                    [[5, 12], [9, 8]],
-                    [[6, 11], [10, 7]],
-                    [[13, 24], [20, 16]],
-                    [[14, 23], [22, 15]]
-                ],
-                // ROUND 5
-                [
-                    [[4, 14], [13, 1]],
-                    [[2, 16], [15, 3]],
-                    [[6, 24], [21, 10]],
-                    [[5, 23], [11, 7]],
-                    [[8, 22], [17, 12]],
-                    [[9, 19], [18, 20]]
-                ],
-                // ROUND 6
-                [
-                    [[1, 12], [5, 4]],
-                    [[2, 7], [6, 3]],
-                    [[9, 20], [21, 8]],
-                    [[10, 23], [22, 11]],
-                    [[13, 24], [17, 18]],
-                    [[14, 19], [16, 15]]
-                ],
-                // ROUND 7
-                [
-                    [[2, 24], [5, 20]],
-                    [[4, 23], [6, 19]],
-                    [[1, 22], [7, 18]],
-                    [[3, 21], [8, 17]],
-                    [[15, 16], [13, 12]],
-                    [[9, 11], [14, 10]]
-                ],
-                // ROUND 8
-                [
-                    [[5, 12], [9, 4]],
-                    [[1, 13], [8, 2]],
-                    [[6, 16], [11, 10]],
-                    [[3, 17], [14, 7]],
-                    [[21, 19], [23, 20]],
-                    [[22, 18], [15, 24]]
-                ],
-                // ROUND 9
-                [
-                    [[2, 24], [17, 4]],
-                    [[1, 19], [18, 3]],
-                    [[6, 12], [11, 8]],
-                    [[5, 9], [10, 7]],
-                    [[14, 20], [21, 16]],
-                    [[13, 23], [22, 15]]
-                ],
-                // ROUND 10
-                [
-                    [[2, 23], [15, 5]],
-                    [[1, 22], [4, 20]],
-                    [[8, 7], [9, 18]],
-                    [[12, 14], [19, 13]],
-                    [[3, 24], [10, 17]],
-                    [[11, 16], [6, 21]]
-                ],
-                // ROUND 11
-                [
-                    [[12, 22], [16, 20]],
-                    [[1, 23], [6, 11]],
-                    [[2, 9], [7, 8]],
-                    [[3, 21], [5, 13]],
-                    [[10, 18], [14, 15]],
-                    [[24, 4], [19, 17]]
-                ],
-                // ROUND 12
-                [
-                    [[2, 16], [13, 4]],
-                    [[5, 17], [14, 1]],
-                    [[6, 24], [21, 8]],
-                    [[3, 22], [15, 7]],
-                    [[10, 18], [23, 12]],
-                    [[9, 19], [20, 11]]
-                ],
-                // ROUND 13
-                [
-                    [[2, 8], [5, 4]],
-                    [[3, 7], [6, 1]],
-                    [[10, 24], [21, 12]],
-                    [[9, 23], [15, 11]],
-                    [[14, 20], [17, 16]],
-                    [[13, 19], [18, 22]]
-                ]
+                [[[1, 4], [2, 3]], [[5, 8], [6, 7]], [[9, 12], [10, 11]], [[13, 16], [14, 15]], [[17, 20], [18, 19]], [[21, 24], [22, 23]]],
+                [[[1, 24], [10, 16]], [[2, 23], [6, 19]], [[3, 22], [7, 18]], [[4, 21], [8, 17]], [[5, 20], [13, 12]], [[11, 15], [14, 9]]],
+                [[[1, 10], [9, 4]], [[2, 11], [12, 3]], [[5, 18], [13, 8]], [[6, 17], [14, 7]], [[15, 24], [19, 20]], [[16, 23], [22, 21]]],
+                [[[1, 21], [17, 2]], [[4, 19], [18, 3]], [[5, 12], [9, 8]], [[6, 11], [10, 7]], [[13, 24], [20, 16]], [[14, 23], [22, 15]]],
+                [[[4, 14], [13, 1]], [[2, 16], [15, 3]], [[6, 24], [21, 10]], [[5, 23], [11, 7]], [[8, 22], [17, 12]], [[9, 19], [18, 20]]],
+                [[[1, 12], [5, 4]], [[2, 7], [6, 3]], [[9, 20], [21, 8]], [[10, 23], [22, 11]], [[13, 24], [17, 18]], [[14, 19], [16, 15]]],
+                [[[2, 24], [5, 20]], [[4, 23], [6, 19]], [[1, 22], [7, 18]], [[3, 21], [8, 17]], [[15, 16], [13, 12]], [[9, 11], [14, 10]]],
+                [[[5, 12], [9, 4]], [[1, 13], [8, 2]], [[6, 16], [11, 10]], [[3, 17], [14, 7]], [[21, 19], [23, 20]], [[22, 18], [15, 24]]],
+                [[[2, 24], [17, 4]], [[1, 19], [18, 3]], [[6, 12], [11, 8]], [[5, 9], [10, 7]], [[14, 20], [21, 16]], [[13, 23], [22, 15]]],
+                [[[2, 23], [15, 5]], [[1, 22], [4, 20]], [[8, 7], [9, 18]], [[12, 14], [19, 13]], [[3, 24], [10, 17]], [[11, 16], [6, 21]]],
+                [[[12, 22], [16, 20]], [[1, 23], [6, 11]], [[2, 9], [7, 8]], [[3, 21], [5, 13]], [[10, 18], [14, 15]], [[24, 4], [19, 17]]],
+                [[[2, 16], [13, 4]], [[5, 17], [14, 1]], [[6, 24], [21, 8]], [[3, 22], [15, 7]], [[10, 18], [23, 12]], [[9, 19], [20, 11]]],
+                [[[2, 8], [5, 4]], [[3, 7], [6, 1]], [[10, 24], [21, 12]], [[9, 23], [15, 11]], [[14, 20], [17, 16]], [[13, 19], [18, 22]]]
             ];
             
             fixture.forEach((round, roundIndex) => {
@@ -1007,7 +937,6 @@
                     const team1Players = match[0].map(id => players.find(p => p.id === id));
                     const team2Players = match[1].map(id => players.find(p => p.id === id));
                     
-                    // Determine if match is within-group or cross-group
                     const team1Groups = team1Players.map(p => p.group);
                     const team2Groups = team2Players.map(p => p.group);
                     const allGroups = [...team1Groups, ...team2Groups];
@@ -1154,43 +1083,115 @@
             container.innerHTML = players.map(player => `
                 <div class="player-edit-card">
                     <h3>#${player.id} ${player.tier}</h3>
-                    <input type="text" value="${player.name}" 
-                           onchange="updatePlayerName(${player.id}, this.value)"
-                           placeholder="Player Name">
+                    <input type="text" id="player-name-${player.id}" value="${player.name}" 
+                           placeholder="Player Name"
+                           data-original="${player.name}"
+                           oninput="checkForChanges()">
                     <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #6B7280;">Skill Rating</label>
-                    <input type="number" step="0.05" min="0" max="5" value="${player.rating}" 
-                           onchange="updatePlayerRating(${player.id}, this.value)">
+                    <input type="number" id="player-rating-${player.id}" step="0.05" min="0" max="5" value="${player.rating}"
+                           data-original="${player.rating}"
+                           oninput="checkForChanges()">
                 </div>
             `).join('');
         }
 
-        function updatePlayerName(id, name) {
-            const player = players.find(p => p.id === id);
-            if (player) {
-                player.name = name;
-                saveToLocalStorage();
-                renderMatches();
-                renderStandings();
+        function checkForChanges() {
+            let hasChanges = false;
+            
+            players.forEach(player => {
+                const nameInput = document.getElementById(`player-name-${player.id}`);
+                const ratingInput = document.getElementById(`player-rating-${player.id}`);
+                
+                if (nameInput && nameInput.value !== nameInput.dataset.original) {
+                    hasChanges = true;
+                    nameInput.classList.add('changed');
+                } else if (nameInput) {
+                    nameInput.classList.remove('changed');
+                }
+                
+                if (ratingInput && ratingInput.value !== ratingInput.dataset.original) {
+                    hasChanges = true;
+                    ratingInput.classList.add('changed');
+                } else if (ratingInput) {
+                    ratingInput.classList.remove('changed');
+                }
+            });
+            
+            const indicator = document.getElementById('unsavedIndicator');
+            if (indicator) {
+                if (hasChanges) {
+                    indicator.classList.add('show');
+                } else {
+                    indicator.classList.remove('show');
+                }
             }
         }
 
-        function updatePlayerRating(id, rating) {
-            const player = players.find(p => p.id === id);
-            if (player) {
-                player.rating = parseFloat(rating);
-                saveToLocalStorage();
-                renderMatches();
+        function savePlayerChanges(event) {
+            let changesMade = false;
+            
+            players.forEach(player => {
+                const nameInput = document.getElementById(`player-name-${player.id}`);
+                const ratingInput = document.getElementById(`player-rating-${player.id}`);
+                
+                if (nameInput && nameInput.value !== player.name) {
+                    player.name = nameInput.value;
+                    nameInput.dataset.original = nameInput.value;
+                    changesMade = true;
+                }
+                
+                if (ratingInput && parseFloat(ratingInput.value) !== player.rating) {
+                    player.rating = parseFloat(ratingInput.value);
+                    ratingInput.dataset.original = ratingInput.value;
+                    changesMade = true;
+                }
+            });
+            
+            // Save to localStorage
+            saveToLocalStorage();
+            
+            // Update all pages - MUST call renderMatches directly
+            renderMatches();
+            initializeFilters();
+            renderStandings();
+            
+            // Hide unsaved indicator
+            const indicator = document.getElementById('unsavedIndicator');
+            if (indicator) {
+                indicator.classList.remove('show');
+            }
+            
+            // Remove changed styling
+            document.querySelectorAll('.player-edit-card input').forEach(input => {
+                input.classList.remove('changed');
+            });
+            
+            // Show success feedback
+            const btn = event ? event.target : document.querySelector('.btn-success');
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Changes Saved!';
+                btn.style.background = '#10B981';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                }, 2000);
             }
         }
 
         function resetAllNames() {
-            if (confirm('Reset all player names to default? This cannot be undone.')) {
-                players.forEach((p, i) => {
-                    p.name = `Player ${i + 1}`;
-                });
-                saveToLocalStorage();
-                renderPlayers();
-                renderMatches();
+            players.forEach((p, i) => {
+                p.name = `Player ${i + 1}`;
+            });
+            saveToLocalStorage();
+            renderPlayers();
+            renderMatches();
+            initializeFilters();
+            
+            const indicator = document.getElementById('unsavedIndicator');
+            if (indicator) {
+                indicator.classList.remove('show');
             }
         }
 
@@ -1345,6 +1346,7 @@
             const roundFilter = document.getElementById('roundFilter');
             const playerFilter = document.getElementById('playerFilter');
             
+            roundFilter.innerHTML = '<option value="all">All Rounds</option>';
             for (let i = 1; i <= 13; i++) {
                 const option = document.createElement('option');
                 option.value = i;
@@ -1352,6 +1354,7 @@
                 roundFilter.appendChild(option);
             }
             
+            playerFilter.innerHTML = '<option value="all">All Players</option>';
             players.forEach(p => {
                 const option = document.createElement('option');
                 option.value = p.id;
@@ -1373,9 +1376,18 @@
         }
 
         function exportData() {
+            const matchScores = matches.map(m => ({
+                round: m.round,
+                team1Ids: m.team1.map(p => p.id),
+                team2Ids: m.team2.map(p => p.id),
+                score1: m.score1,
+                score2: m.score2,
+                type: m.type
+            }));
+            
             const data = {
                 players: players,
-                matches: matches,
+                matchScores: matchScores,
                 knockoutMatches: knockoutMatches,
                 knockoutConfig: knockoutConfig,
                 exportDate: new Date().toISOString()
@@ -1399,7 +1411,28 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     players = data.players;
-                    matches = data.matches;
+                    
+                    // Regenerate matches with current player references
+                    generateMatches();
+                    
+                    // Apply saved scores
+                    if (data.matchScores) {
+                        data.matchScores.forEach((savedMatch, index) => {
+                            if (matches[index]) {
+                                matches[index].score1 = savedMatch.score1;
+                                matches[index].score2 = savedMatch.score2;
+                            }
+                        });
+                    } else if (data.matches) {
+                        // Backward compatibility with old format
+                        data.matches.forEach((savedMatch, index) => {
+                            if (matches[index]) {
+                                matches[index].score1 = savedMatch.score1;
+                                matches[index].score2 = savedMatch.score2;
+                            }
+                        });
+                    }
+                    
                     knockoutMatches = data.knockoutMatches || { quarterFinals: [], semiFinals: [], final: null };
                     knockoutConfig = data.knockoutConfig || { qfPoints: 16, sfPoints: 16, finalPoints: 16 };
                     
@@ -1418,10 +1451,13 @@
         function resetScores() {
             if (confirm('Reset all match scores? This will create a backup first.')) {
                 saveVersion(true);
+                
+                // Just clear scores, matches will keep player references
                 matches.forEach(m => {
                     m.score1 = null;
                     m.score2 = null;
                 });
+                
                 knockoutMatches = { quarterFinals: [], semiFinals: [], final: null };
                 saveToLocalStorage();
                 renderMatches();
@@ -1516,7 +1552,6 @@
             const table = document.getElementById('fairness1Table');
             const fairnessData = calculateFairness1();
             
-            // Sort from easiest to hardest (highest total to lowest)
             fairnessData.sort((a, b) => b.total - a.total);
             
             table.innerHTML = `
@@ -1575,12 +1610,9 @@
                     const myTeam = isTeam1 ? match.team1 : match.team2;
                     const opponentTeam = isTeam1 ? match.team2 : match.team1;
                     
-                    // My team rating (player + partner)
                     const myTeamRating = myTeam.reduce((sum, p) => sum + p.rating, 0);
-                    // Opponent team rating (opponent1 + opponent2)
                     const opponentTeamRating = opponentTeam.reduce((sum, p) => sum + p.rating, 0);
                     
-                    // Fairness = My Team Rating - Opponent Team Rating
                     const fairness = myTeamRating - opponentTeamRating;
                     rounds.push(fairness);
                 }
@@ -1598,7 +1630,6 @@
             const table = document.getElementById('fairness2Table');
             const fairnessData = calculateFairness2();
             
-            // Sort from easiest to hardest (highest total to lowest)
             fairnessData.sort((a, b) => b.total - a.total);
             
             table.innerHTML = `
@@ -1657,13 +1688,10 @@
                     const myTeam = isTeam1 ? match.team1 : match.team2;
                     const opponentTeam = isTeam1 ? match.team2 : match.team1;
                     
-                    // Get partner (the other player on my team)
                     const partner = myTeam.find(p => p.id !== player.id);
                     
-                    // Average opponent rating
                     const avgOpponentRating = opponentTeam.reduce((sum, p) => sum + p.rating, 0) / 2;
                     
-                    // Fairness = Partner Rating - Avg Opponent Rating
                     const fairness = partner.rating - avgOpponentRating;
                     rounds.push(fairness);
                 }
@@ -1711,21 +1739,17 @@
             const opponentMatrix = Array(24).fill(0).map(() => Array(24).fill(0));
             
             matches.forEach(match => {
-                // Count partnerships (teammates)
                 const team1p1 = match.team1[0].id - 1;
                 const team1p2 = match.team1[1].id - 1;
                 const team2p1 = match.team2[0].id - 1;
                 const team2p2 = match.team2[1].id - 1;
                 
-                // Team 1 partnership
                 partnershipMatrix[team1p1][team1p2]++;
                 partnershipMatrix[team1p2][team1p1]++;
                 
-                // Team 2 partnership
                 partnershipMatrix[team2p1][team2p2]++;
                 partnershipMatrix[team2p2][team2p1]++;
                 
-                // Count opponents (players on opposite teams)
                 match.team1.forEach(p1 => {
                     match.team2.forEach(p2 => {
                         opponentMatrix[p1.id - 1][p2.id - 1]++;
@@ -1752,8 +1776,8 @@
                 }
             }
             
-            const maxPartnerships = (24 * 23) / 2; // 276 possible unique pairs
-            const maxOpponents = (24 * 23) / 2; // 276 possible unique opponent pairs
+            const maxPartnerships = (24 * 23) / 2;
+            const maxOpponents = (24 * 23) / 2;
             
             return {
                 partnershipMatrix,
@@ -1791,7 +1815,6 @@
             }
             html += '</tbody></table></div>';
             
-            // Add legend
             html += `
                 <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; font-size: 13px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -1830,15 +1853,13 @@
                         html += '<td style="background: #E5E7EB;">-</td>';
                     } else {
                         const value = matrix[i][j];
-                        // Use different coloring for opponent matrix (green tones)
-                        let cellClass = 'matrix-cell-0';
                         let bgColor = '#F9FAFB';
                         if (value > 0 && value <= 2) {
-                            bgColor = '#D1FAE5'; // Light green
+                            bgColor = '#D1FAE5';
                         } else if (value > 2 && value <= 4) {
-                            bgColor = '#A7F3D0'; // Medium green
+                            bgColor = '#A7F3D0';
                         } else if (value > 4) {
-                            bgColor = '#6EE7B7'; // Dark green
+                            bgColor = '#6EE7B7';
                         }
                         html += `<td style="background: ${bgColor};" title="Player ${i+1} vs Player ${j+1}: ${value} times">${value || ''}</td>`;
                     }
@@ -1847,7 +1868,6 @@
             }
             html += '</tbody></table></div>';
             
-            // Add legend
             html += `
                 <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; font-size: 13px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -1876,7 +1896,6 @@
             const standings = calculateStandings();
             const top12 = standings.slice(0, 12);
             
-            // Render qualified players
             const qualifiedContainer = document.getElementById('qualifiedPlayers');
             qualifiedContainer.innerHTML = top12.map((s, i) => `
                 <div class="qualified-badge ${getTierClass(s.player)}">
@@ -1884,7 +1903,6 @@
                 </div>
             `).join('');
             
-            // Initialize knockout matches if needed
             if (knockoutMatches.quarterFinals.length === 0) {
                 initializeKnockout(top12);
             }
@@ -2109,7 +2127,6 @@
             match.score1 = null;
             match.score2 = null;
             
-            // Clear dependent matches
             if (stage === 'quarterFinals') {
                 knockoutMatches.semiFinals.forEach(m => {
                     m.team1 = null;
@@ -2135,13 +2152,11 @@
         function updateSemiFinals() {
             const qf = knockoutMatches.quarterFinals;
             
-            // SF1: Winner of QF1 vs Winner of QF4
             if (qf[0].score1 !== null && qf[0].score2 !== null && qf[3].score1 !== null && qf[3].score2 !== null) {
                 knockoutMatches.semiFinals[0].team1 = qf[0].score1 > qf[0].score2 ? qf[0].team1 : qf[0].team2;
                 knockoutMatches.semiFinals[0].team2 = qf[3].score1 > qf[3].score2 ? qf[3].team1 : qf[3].team2;
             }
             
-            // SF2: Winner of QF2 vs Winner of QF3
             if (qf[1].score1 !== null && qf[1].score2 !== null && qf[2].score1 !== null && qf[2].score2 !== null) {
                 knockoutMatches.semiFinals[1].team1 = qf[1].score1 > qf[1].score2 ? qf[1].team1 : qf[1].team2;
                 knockoutMatches.semiFinals[1].team2 = qf[2].score1 > qf[2].score2 ? qf[2].team1 : qf[2].team2;
@@ -2171,9 +2186,19 @@
         }
 
         function saveToLocalStorage() {
+            // Only save scores, not the entire matches with player objects
+            const matchScores = matches.map(m => ({
+                round: m.round,
+                team1Ids: m.team1.map(p => p.id),
+                team2Ids: m.team2.map(p => p.id),
+                score1: m.score1,
+                score2: m.score2,
+                type: m.type
+            }));
+            
             const data = {
                 players: players,
-                matches: matches,
+                matchScores: matchScores,
                 knockoutMatches: knockoutMatches,
                 knockoutConfig: knockoutConfig
             };
@@ -2185,13 +2210,25 @@
             if (saved) {
                 const data = JSON.parse(saved);
                 players = data.players;
-                matches = data.matches;
+                
+                // Regenerate matches with current player references
+                generateMatches();
+                
+                // Apply saved scores to the regenerated matches
+                if (data.matchScores) {
+                    data.matchScores.forEach((savedMatch, index) => {
+                        if (matches[index]) {
+                            matches[index].score1 = savedMatch.score1;
+                            matches[index].score2 = savedMatch.score2;
+                        }
+                    });
+                }
+                
                 knockoutMatches = data.knockoutMatches || { quarterFinals: [], semiFinals: [], final: null };
                 knockoutConfig = data.knockoutConfig || { qfPoints: 16, sfPoints: 16, finalPoints: 16 };
             }
         }
 
-        // Initialize app
         function init() {
             initializePlayers();
             generateMatches();
