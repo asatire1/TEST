@@ -2,755 +2,1194 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#3B82F6">
-    <title>Americano Padel Tournament</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosystem Game - Complete Development Document</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        html {
-            -webkit-overflow-scrolling: touch;
-            overflow-y: scroll;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
-            min-height: 100vh;
-            padding: 20px;
-            overflow-y: scroll;
-            -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
-            overscroll-behavior-y: contain;
-        }
-        
-        .container { 
-            max-width: 1200px; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
             margin: 0 auto;
-            -webkit-overflow-scrolling: touch;
-            will-change: scroll-position;
+            padding: 20px;
+            background: #f5f5f5;
         }
-        
-        .header {
+        .container {
             background: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .header h1 { font-size: 28px; color: #1F2937; margin-bottom: 8px; }
-        .header p { color: #6B7280; font-size: 15px; }
-        
-        .tab-nav {
-            background: white;
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 10px;
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
         }
-        
-        .tab {
-            flex: 1;
-            padding: 14px 12px;
-            border: none;
-            background: #F3F4F6;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            color: #6B7280;
-            transition: all 0.2s ease;
-            -webkit-transition: all 0.2s ease;
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            background: #f8f9fa;
+            padding: 15px;
         }
-        
-        .tab.active { 
-            background: #3B82F6; 
-            color: white;
-            transform: scale(1.02);
-            -webkit-transform: scale(1.02);
+        h3 {
+            color: #555;
+            margin-top: 25px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
         }
-        
-        .page { display: none; }
-        .page.active { 
-            display: block;
-            animation: fadeIn 0.3s ease;
-            -webkit-animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @-webkit-keyframes fadeIn {
-            from { opacity: 0; -webkit-transform: translateY(10px); }
-            to { opacity: 1; -webkit-transform: translateY(0); }
-        }
-        
-        .section {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-        }
-        
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #1F2937;
-        }
-        
-        .player-count-buttons {
-            display: flex;
-            gap: 12px;
-            margin: 16px 0;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .player-count-btn {
-            padding: 12px 24px;
-            cursor: pointer;
-            border: 2px solid #E5E7EB;
-            background: white;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #6B7280;
-            min-width: 60px;
-            transition: all 0.2s ease;
-            -webkit-transition: all 0.2s ease;
-        }
-        
-        .player-count-btn:active {
-            transform: scale(0.95);
-            -webkit-transform: scale(0.95);
-        }
-        
-        .player-count-btn.active {
-            background: #3B82F6;
-            color: white;
-            border-color: #3B82F6;
-            transform: scale(1.05);
-            -webkit-transform: scale(1.05);
-        }
-        
-        .player-inputs {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
+        h4 {
+            color: #666;
             margin-top: 20px;
         }
-        
-        .player-input-group { display: flex; flex-direction: column; }
-        .player-input-group label {
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 14px;
+        .emoji {
+            font-size: 24px;
         }
-        
-        .player-input-group input {
-            padding: 12px;
-            border: 2px solid #E5E7EB;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-            -webkit-transition: border-color 0.3s ease;
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
         }
-        
-        .player-input-group input:focus {
-            outline: none;
-            border-color: #3B82F6;
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            line-height: 1.4;
         }
-        
-        .checkbox-group { margin: 20px 0; }
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #374151;
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
         }
-        
-        .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
+        .success {
+            background: #d4edda;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
         }
-        
-        .fixed-points-options {
-            margin-top: 16px;
-            padding: 20px;
-            border: 2px solid #E5E7EB;
-            background: #F9FAFB;
-            border-radius: 8px;
+        .danger {
+            background: #f8d7da;
+            padding: 15px;
+            border-left: 4px solid #dc3545;
+            margin: 15px 0;
         }
-        
-        .fixed-points-options label {
-            display: block;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
+        .info {
+            background: #d1ecf1;
+            padding: 15px;
+            border-left: 4px solid #17a2b8;
+            margin: 15px 0;
         }
-        
-        .fixed-points-options input[type="number"] {
-            width: 100px;
-            padding: 10px;
-            border: 2px solid #E5E7EB;
-            border-radius: 6px;
-            font-size: 16px;
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 30px;
         }
-        
-        .start-btn {
+        li {
+            margin: 8px 0;
+        }
+        table {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #10B981, #059669);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 700;
-            margin-top: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-            transition: transform 0.2s ease;
-            -webkit-transition: transform 0.2s ease;
+            border-collapse: collapse;
+            margin: 20px 0;
         }
-        
-        .start-btn:active {
-            transform: scale(0.98);
-            -webkit-transform: scale(0.98);
-        }
-        
-        .backup-buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .backup-buttons button {
-            flex: 1;
-            min-width: 140px;
-            padding: 12px 20px;
-            cursor: pointer;
-            border: 2px solid #E5E7EB;
-            background: white;
-            border-radius: 8px;
-            font-weight: 600;
-            color: #374151;
-            transition: all 0.2s ease;
-            -webkit-transition: all 0.2s ease;
-        }
-        
-        .backup-buttons button:active {
-            transform: scale(0.95);
-            -webkit-transform: scale(0.95);
-        }
-        
-        .leaderboard-item {
-            padding: 20px;
-            border-bottom: 2px solid #F3F4F6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s ease;
-            -webkit-transition: background 0.2s ease;
-        }
-        
-        .leaderboard-item:last-child { border-bottom: none; }
-        .leaderboard-item span:first-child {
-            font-weight: 600;
-            color: #1F2937;
-            font-size: 18px;
-        }
-        
-        .leaderboard-item span:last-child {
-            font-size: 32px;
-            font-weight: 700;
-            color: #3B82F6;
-        }
-        
-        .round-section {
-            border: 2px solid #E5E7EB;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            background: #FAFAFA;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-        }
-        
-        .round-title {
-            font-weight: 700;
-            font-size: 18px;
-            margin-bottom: 16px;
-            color: #1F2937;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #E5E7EB;
-        }
-        
-        .match {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin-bottom: 12px;
-        }
-        
-        @media (min-width: 640px) {
-            .match { grid-template-columns: repeat(2, 1fr); }
-        }
-        
-        .team {
-            border: 2px solid #E5E7EB;
-            padding: 16px;
-            border-radius: 8px;
-            background: white;
-        }
-        
-        .team-players {
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #1F2937;
-            font-size: 15px;
-        }
-        
-        .score-input {
-            width: 80px;
-            padding: 10px;
-            margin-top: 8px;
-            border: 2px solid #E5E7EB;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: border-color 0.3s ease;
-            -webkit-transition: border-color 0.3s ease;
-        }
-        
-        .score-input:focus {
-            outline: none;
-            border-color: #3B82F6;
-        }
-        
-        .score-input[readonly] { background: #F3F4F6; }
-        
-        .resting {
-            margin: 16px 0 0 0;
-            font-style: italic;
-            color: #6B7280;
+        th, td {
+            border: 1px solid #ddd;
             padding: 12px;
-            background: #FEF3C7;
-            border-radius: 6px;
-            border-left: 4px solid #F59E0B;
+            text-align: left;
         }
-        
-        .reset-btn {
-            width: 100%;
-            padding: 12px 20px;
-            background: #EF4444;
+        th {
+            background: #3498db;
             color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-            transition: transform 0.2s ease;
-            -webkit-transition: transform 0.2s ease;
-            margin-top: 20px;
+            font-weight: bold;
         }
-        
-        .reset-btn:active {
-            transform: scale(0.95);
-            -webkit-transform: scale(0.95);
+        tr:nth-child(even) {
+            background: #f8f9fa;
         }
-        
-        .info-text {
-            color: #6B7280;
-            font-size: 14px;
-            margin-top: 12px;
-            padding: 12px;
-            background: #EFF6FF;
-            border-radius: 6px;
-            border-left: 4px solid #3B82F6;
-        }
-        
-        .auto-save-notice {
-            background: linear-gradient(135deg, #10B981, #059669);
+        .toc {
+            background: #ecf0f1;
             padding: 20px;
-            text-align: center;
-            color: white;
-            border-radius: 12px;
-            font-weight: 600;
+            border-radius: 5px;
+            margin: 20px 0;
         }
-        
-        input[type="file"] { display: none; }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6B7280;
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
         }
-        
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+        .toc a:hover {
+            text-decoration: underline;
         }
-        
-        .empty-state-text {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #374151;
+        .timing-box {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
         }
-        
-        .empty-state-subtext {
-            font-size: 14px;
+        .timing-box h4 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        strong {
+            color: #2c3e50;
+        }
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🏆 AMERICANO PADEL TOURNAMENT</h1>
-            <p id="headerInfo">Configure your tournament to get started</p>
+        <h1>Ecosystem Simulation Game<br>Complete Development Document</h1>
+        
+        <div class="info">
+            <p><strong>📥 To Save This Document:</strong> Right-click anywhere → "Save As" → Save as HTML file</p>
+            <p><strong>Grid:</strong> 32×32 tiles (1,024 total) | <strong>Layers:</strong> Ground (grass) + Animal (rabbits/foxes) | <strong>Grass Coverage:</strong> 100% possible | <strong>Max Capacity:</strong> 1,000 grass, 500 rabbits, 250 foxes | <strong>Version:</strong> 2.0</p>
         </div>
 
-        <div class="tab-nav">
-            <button class="tab active" onclick="switchTab('settings')">⚙️ SETTINGS</button>
-            <button class="tab" onclick="switchTab('tournament')">🎾 MATCHES</button>
-            <button class="tab" onclick="switchTab('leaderboard')">🏆 RANKING</button>
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+                <li><a href="#overview">Game Overview</a></li>
+                <li><a href="#grid">Grid System & Two-Layer Mechanics</a></li>
+                <li><a href="#time">Time System</a></li>
+                <li><a href="#grass">🌱 Grass Mechanics (Complete Details)</a></li>
+                <li><a href="#rabbit">🐰 Rabbit Mechanics (Complete Details)</a></li>
+                <li><a href="#fox">🦊 Fox Mechanics (Complete Details)</a></li>
+                <li><a href="#spatial">Spatial Placement & Strategy</a></li>
+                <li><a href="#winloss">Win/Loss Conditions</a></li>
+                <li><a href="#ui">UI Specifications</a></li>
+                <li><a href="#technical">Technical Implementation</a></li>
+                <li><a href="#balance">Balance & Testing</a></li>
+            </ol>
         </div>
 
-        <div id="settings" class="page active">
-            <div class="section">
-                <div class="section-title">👥 Tournament Setup</div>
-                <label style="font-weight: 600; color: #374151; margin-bottom: 8px; display: block;">Number of Players:</label>
-                <div class="player-count-buttons">
-                    <button class="player-count-btn" onclick="setPlayerCount(5)">5</button>
-                    <button class="player-count-btn active" onclick="setPlayerCount(6)">6</button>
-                    <button class="player-count-btn" onclick="setPlayerCount(7)">7</button>
-                    <button class="player-count-btn" onclick="setPlayerCount(8)">8</button>
-                    <button class="player-count-btn" onclick="setPlayerCount(9)">9</button>
-                </div>
-                <div class="info-text" id="tournamentInfo">ℹ️ 12 rounds • 8 games per player • Perfect balance</div>
-            </div>
+        <h2 id="overview">1. Game Overview</h2>
+        
+        <div class="info">
+            <h3>🎮 The Core Experience</h3>
+            <p><strong>Starting Point:</strong> Players face a completely empty 32×32 grid - a blank ecosystem waiting to be built.</p>
+            <p><strong>The Challenge:</strong> Populate this empty world with grass, rabbits, and foxes in the right quantities and positions to create a balanced food chain.</p>
+            <p><strong>The Test:</strong> Once you press "Start," you can only watch. Will your ecosystem thrive, or will it collapse?</p>
+            <p><strong>Victory:</strong> Achieve a self-sustaining ecosystem that survives 10 days without your intervention.</p>
+        </div>
+        
+        <h3>Concept</h3>
+        <p>A mobile ecosystem simulation game where players create and balance a simple food chain ecosystem with grass (producers), rabbits (herbivores), and foxes (carnivores).</p>
+        
+        <div class="highlight">
+            <h4>🎯 Core Challenge</h4>
+            <p><strong>The grid starts completely empty.</strong> Players must strategically place organisms during the setup phase to create a balanced, self-sustaining ecosystem. The goal is to achieve the right balance where all three species can survive indefinitely without player intervention.</p>
+            <p>Success depends entirely on initial placement decisions - once the simulation starts, players can only observe!</p>
+        </div>
+        
+        <p>Players strategically place organisms during setup phase, then watch the ecosystem either thrive or collapse during simulation phase.</p>
+        
+        <h3>Platform & Controls</h3>
+        <ul>
+            <li><strong>Platform:</strong> Mobile (iOS/Android)</li>
+            <li><strong>Orientation:</strong> Portrait mode</li>
+            <li><strong>Screen Size:</strong> Optimized for 375×667px (iPhone SE)</li>
+            <li><strong>Controls:</strong> Touch-based (touch and hold to place organisms)</li>
+        </ul>
 
-            <div class="section">
-                <div class="section-title">✏️ Player Names</div>
-                <div class="player-inputs" id="playerInputs"></div>
-            </div>
+        <h3>Core Gameplay</h3>
+        <ol>
+            <li><strong>Empty Grid:</strong> Game starts with completely blank 32×32 grid (all 1,024 tiles empty)</li>
+            <li><strong>Setup Phase:</strong> Player manually places grass, rabbits, and foxes on empty grid (unlimited quantities, full control)</li>
+            <li><strong>Strategic Challenge:</strong> Player must create the right balance and placement to make ecosystem self-sustaining</li>
+            <li><strong>Simulation Phase:</strong> Ecosystem runs automatically (player cannot add/remove organisms - only observe)</li>
+            <li><strong>Victory:</strong> Keep all 3 species alive for 10 game days (proves ecosystem is self-sustaining)</li>
+            <li><strong>Defeat:</strong> Any species goes extinct (proves ecosystem was unbalanced)</li>
+        </ol>
+        
+        <p><strong>The Challenge:</strong> Can you populate the empty grid in a way that creates a thriving, self-sustaining ecosystem? Or will your ecosystem collapse from poor planning?</p>
 
-            <div class="section">
-                <div class="section-title">⚡ Scoring Options</div>
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="fixedPointsCheckbox" onchange="toggleFixedPoints()">
-                        <span>Fixed Points Per Game</span>
-                    </label>
-                </div>
-                <div class="fixed-points-options" id="fixedPointsOptions" style="display: none;">
-                    <label>Total Points Per Game: 
-                        <input type="number" id="totalPointsInput" value="16" min="1">
-                    </label>
-                    <div class="info-text">
-                        When you enter Team 1 score, Team 2 auto-calculates.
-                    </div>
-                </div>
-            </div>
-
-            <button class="start-btn" onclick="startTournament()">START TOURNAMENT →</button>
-
-            <div class="section">
-                <div class="section-title">💾 Backup & Data</div>
-                <div class="backup-buttons">
-                    <button onclick="downloadBackup()">📥 Download</button>
-                    <button onclick="document.getElementById('uploadInput').click()">📤 Upload</button>
-                    <button onclick="clearAllData()">🗑️ Clear</button>
-                </div>
-                <input type="file" id="uploadInput" accept=".json" onchange="uploadBackup(event)">
-            </div>
+        <h2 id="grid">2. Grid System & Two-Layer Mechanics</h2>
+        
+        <div class="highlight">
+            <h3>⚠️ CRITICAL: Two-Layer System</h3>
+            <p>This is the most important mechanic to understand. Each tile has TWO independent layers:</p>
         </div>
 
-        <div id="tournament" class="page">
-            <div class="section">
-                <div class="section-title">📋 Match Schedule</div>
-                <div id="matchSchedule"></div>
-            </div>
+        <h3>Layer Structure</h3>
+        <table>
+            <tr>
+                <th>Layer</th>
+                <th>What It Contains</th>
+                <th>Rules</th>
+            </tr>
+            <tr>
+                <td><strong>Ground Layer</strong></td>
+                <td>Grass only</td>
+                <td>Can have grass or be empty</td>
+            </tr>
+            <tr>
+                <td><strong>Animal Layer</strong></td>
+                <td>Rabbits or Foxes</td>
+                <td>Can have ONE rabbit OR ONE fox (not both)</td>
+            </tr>
+        </table>
 
-            <div class="auto-save-notice">
-                ✅ Auto-Save Active!<br>
-                All changes save automatically!
-            </div>
+        <h3>Occupancy Rules</h3>
+        <div class="success">
+            <h4>✅ ALLOWED (Same Tile):</h4>
+            <ul>
+                <li>Grass (ground layer) + Rabbit (animal layer)</li>
+                <li>Grass (ground layer) + Fox (animal layer)</li>
+                <li>Empty ground + Empty animal layer</li>
+            </ul>
         </div>
 
-        <div id="leaderboard" class="page">
-            <div class="section">
-                <div class="section-title">🏆 Leaderboard</div>
-                <div id="leaderboardContent"></div>
-                <button class="reset-btn" onclick="resetAllScores()">Reset All Scores</button>
-            </div>
+        <div class="danger">
+            <h4>❌ NOT ALLOWED (Same Tile):</h4>
+            <ul>
+                <li>Rabbit + Fox (both need animal layer - conflict!)</li>
+            </ul>
         </div>
+
+        <h3>Grid Specifications</h3>
+        <ul>
+            <li><strong>Grid Size:</strong> 32 × 32 tiles = 1,024 total tiles</li>
+            <li><strong>Tile Size:</strong> ~11.7px × 11.7px (calculated dynamically: screen width ÷ 32)</li>
+            <li><strong>Visual Rendering:</strong> Animals render on top of grass when both occupy same tile</li>
+        </ul>
+
+        <h3>Organism Visual Sizes (NOT Grid Space)</h3>
+        <table>
+            <tr>
+                <th>Organism</th>
+                <th>Visual Size</th>
+                <th>Example (11.7px tile)</th>
+                <th>Grid Space Used</th>
+            </tr>
+            <tr>
+                <td>Grass 🌱</td>
+                <td>10% of tile</td>
+                <td>~1.17px diameter</td>
+                <td>1 tile (ground layer)</td>
+            </tr>
+            <tr>
+                <td>Rabbit 🐰</td>
+                <td>25% of tile</td>
+                <td>~2.9px diameter</td>
+                <td>1 tile (animal layer)</td>
+            </tr>
+            <tr>
+                <td>Fox 🦊</td>
+                <td>50% of tile</td>
+                <td>~5.85px diameter</td>
+                <td>1 tile (animal layer)</td>
+            </tr>
+        </table>
+
+        <p><strong>Important:</strong> Visual size is for clarity only (helps players identify organisms). Each organism occupies exactly 1 tile regardless of visual size.</p>
+
+        <h2 id="time">3. Time System</h2>
+        
+        <div class="timing-box">
+            <h4>⏰ Base Time Unit</h4>
+            <p><strong>1 Game Day = 30 seconds</strong> of real time (at 1x speed)</p>
+        </div>
+
+        <h3>Speed Controls</h3>
+        <table>
+            <tr>
+                <th>Speed</th>
+                <th>Real Time Per Game Day</th>
+                <th>Use Case</th>
+            </tr>
+            <tr>
+                <td>0.5x</td>
+                <td>60 seconds</td>
+                <td>Slow motion, detailed observation</td>
+            </tr>
+            <tr>
+                <td>1x</td>
+                <td>30 seconds</td>
+                <td>Normal speed (default)</td>
+            </tr>
+            <tr>
+                <td>2x</td>
+                <td>15 seconds</td>
+                <td>Fast forward</td>
+            </tr>
+            <tr>
+                <td>4x</td>
+                <td>7.5 seconds</td>
+                <td>Very fast, see long-term patterns</td>
+            </tr>
+        </table>
+
+        <h3>Victory Timer</h3>
+        <p><strong>Win Condition:</strong> Survive 10 game days = 5 minutes real-time at 1x speed</p>
+
+        <h2 id="grass">4. 🌱 GRASS MECHANICS (Complete Details)</h2>
+        
+        <h3>Purpose</h3>
+        <p>Foundation of food chain. Converts sunlight to energy. Food source for rabbits.</p>
+
+        <h3>Growth & Spreading</h3>
+        
+        <div class="timing-box">
+            <h4>How Fast Does Grass Grow?</h4>
+            <p><strong>Spread Rate: 1 new grass tile every 5 seconds</strong></p>
+            <p><strong>Per Day: 6 new tiles per grass patch per day</strong></p>
+            <p><strong>Can spread to ANY tile on ground layer, even areas never planted</strong></p>
+        </div>
+
+        <h4>Growth Mechanics (Step-by-Step)</h4>
+        <ol>
+            <li>Every 5 seconds, each existing grass tile attempts to spread</li>
+            <li>Grass selects ONE random adjacent tile (up, down, left, right, or diagonal = 8 possible tiles)</li>
+            <li>Grass checks if that tile's <strong>ground layer</strong> is empty</li>
+            <li>If ground layer is empty, new grass spawns there (no coverage limit)</li>
+            <li>Animals can still be on that tile's animal layer - doesn't block grass growth</li>
+            <li><strong>Grass can spread to ANY tile</strong> - doesn't need to have been planted there initially</li>
+        </ol>
+
+        <h4>Maximum Coverage</h4>
+        <ul>
+            <li><strong>Maximum grass tiles:</strong> 1,024 tiles (100% coverage - entire field)</li>
+            <li><strong>Practical target:</strong> 1,000 grass tiles recommended</li>
+            <li><strong>No artificial limit:</strong> Grass can cover the entire ground layer if conditions allow</li>
+            <li>Grass will naturally spread to fill all available ground layer space</li>
+            <li>Only limited by rabbit consumption rate</li>
+        </ul>
+
+        <h3>Grass Consumption (How Rabbits Eat Grass)</h3>
+        
+        <div class="timing-box">
+            <h4>How Rabbits Consume Grass</h4>
+            <ol>
+                <li>Rabbit moves to a tile</li>
+                <li>If that tile has grass on <strong>ground layer</strong>, rabbit can eat it</li>
+                <li>Rabbit eats grass instantly when occupying same tile</li>
+                <li>Grass is removed from ground layer</li>
+                <li>Rabbit remains on animal layer of that tile</li>
+                <li>Rabbit's hunger timer resets to 0</li>
+            </ol>
+        </div>
+
+        <p><strong>Important:</strong> Rabbit doesn't need to "touch" or "collide" with grass. If rabbit is on tile X and grass is on tile X's ground layer, rabbit automatically eats it.</p>
+
+        <h3>Grass Regrowth After Being Eaten</h3>
+        
+        <div class="timing-box">
+            <h4>Regrowth Time: 15 seconds</h4>
+            <p>After grass is eaten, that tile's ground layer remains empty for 15 seconds, then grass regrows automatically.</p>
+        </div>
+
+        <div class="info">
+            <h4>🌱 Grass Spreading Behavior</h4>
+            <p><strong>Important:</strong> Grass spreads organically across the entire field. You only need to plant a few grass patches during setup - they will naturally spread to adjacent tiles over time, eventually covering the entire ground layer if rabbit consumption doesn't keep it in check.</p>
+            <p>This creates dynamic gameplay where grass coverage expands and contracts based on the rabbit population!</p>
+        </div>
+
+        <h3>Grass Death Conditions</h3>
+        <ul>
+            <li>Eaten by rabbit (only way grass "dies")</li>
+            <li>Grass cannot die from overcrowding</li>
+            <li>Grass cannot starve</li>
+        </ul>
+
+        <h3>Complete Grass Timing Summary</h3>
+        <table>
+            <tr>
+                <th>Event</th>
+                <th>Timing</th>
+            </tr>
+            <tr>
+                <td>Spread to new tile</td>
+                <td>Every 5 seconds</td>
+            </tr>
+            <tr>
+                <td>New tiles per day (per grass)</td>
+                <td>6 tiles</td>
+            </tr>
+            <tr>
+                <td>Regrowth after eaten</td>
+                <td>15 seconds</td>
+            </tr>
+            <tr>
+                <td>Maximum coverage</td>
+                <td>1,024 tiles (100% - entire field)</td>
+            </tr>
+            <tr>
+                <td>Can grow on unplanted areas</td>
+                <td>Yes - spreads to any empty ground layer tile</td>
+            </tr>
+        </table>
+
+        <h2 id="rabbit">5. 🐰 RABBIT MECHANICS (Complete Details)</h2>
+        
+        <h3>Purpose</h3>
+        <p>Middle of food chain. Converts plant energy to animal energy. Prey for foxes.</p>
+
+        <h3>Movement</h3>
+        
+        <div class="timing-box">
+            <h4>Movement Speed: 2 tiles per second</h4>
+            <p>Rabbit can cross 2 tiles every second. On 20×20 grid, takes 10 seconds to cross entire field.</p>
+        </div>
+
+        <h4>Movement Behavior</h4>
+        <table>
+            <tr>
+                <th>Rabbit State</th>
+                <th>Movement Pattern</th>
+            </tr>
+            <tr>
+                <td>Well-Fed (hunger < 6 sec)</td>
+                <td>Random wandering in any direction</td>
+            </tr>
+            <tr>
+                <td>Hungry (hunger > 6 sec)</td>
+                <td>Moves directly toward nearest grass within detection range</td>
+            </tr>
+            <tr>
+                <td>No grass in range</td>
+                <td>Random wandering (searching for grass)</td>
+            </tr>
+        </table>
+
+        <h4>Detection Range</h4>
+        <p><strong>Rabbits can "see" grass within 3 tiles</strong></p>
+        <ul>
+            <li>Rabbit at position (10, 10) can detect grass at (7-13, 7-13) - a 7×7 area</li>
+            <li>If grass exists within this range, rabbit moves toward nearest grass</li>
+            <li>If no grass in range, rabbit wanders randomly</li>
+        </ul>
+
+        <div class="danger">
+            <h4>⚠️ Critical Distance Problem</h4>
+            <p>If rabbit is more than <strong>15 tiles</strong> from nearest grass, it will likely starve before finding food!</p>
+            <p><strong>Why?</strong> Rabbit has 12-second starvation timer. Random wandering on larger 32×32 grid takes 30+ seconds to find distant grass.</p>
+        </div>
+
+        <h3>Hunger & Eating</h3>
+        
+        <div class="timing-box">
+            <h4>Hunger Timer: Must eat every 12 seconds</h4>
+            <p>Rabbit tracks how long since last meal. If timer reaches 12 seconds without eating → rabbit dies.</p>
+        </div>
+
+        <h4>How Often Do Rabbits Eat Grass?</h4>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Hunger timer</td>
+                <td>12 seconds</td>
+            </tr>
+            <tr>
+                <td>Eating frequency</td>
+                <td>Every 12 seconds (when grass available)</td>
+            </tr>
+            <tr>
+                <td>Grass consumed per feeding</td>
+                <td>1 grass tile</td>
+            </tr>
+            <tr>
+                <td>Grass consumed per day</td>
+                <td>~2.5 grass tiles</td>
+            </tr>
+        </table>
+
+        <h4>Eating Process (Step-by-Step)</h4>
+        <ol>
+            <li>Rabbit moves to tile</li>
+            <li>Game checks: Does this tile have grass on ground layer?</li>
+            <li>If YES:
+                <ul>
+                    <li>Remove grass from ground layer</li>
+                    <li>Reset rabbit's hunger timer to 0</li>
+                    <li>Rabbit stays on animal layer</li>
+                </ul>
+            </li>
+            <li>If NO: Rabbit continues moving, hunger timer continues counting up</li>
+        </ol>
+
+        <h4>Starvation</h4>
+        <ul>
+            <li>If hunger timer reaches 12 seconds without eating → rabbit dies</li>
+            <li>Dead rabbit removed from animal layer</li>
+            <li>Tile becomes available for other animals</li>
+        </ul>
+
+        <h3>Reproduction</h3>
+        
+        <div class="timing-box">
+            <h4>How Often Do Rabbits Reproduce?</h4>
+            <p><strong>Reproduction Rate: 1 baby every 40 seconds (when well-fed)</strong></p>
+            <p><strong>Per Day: 0.75 babies per rabbit per day</strong></p>
+        </div>
+
+        <h4>Reproduction Requirements (ALL must be true)</h4>
+        <ol>
+            <li><strong>Well-fed:</strong> Rabbit must have eaten within last 6 seconds</li>
+            <li><strong>Cooldown complete:</strong> 40 seconds passed since last reproduction</li>
+            <li><strong>Space available:</strong> At least ONE adjacent tile with empty animal layer</li>
+            <li><strong>Not overcrowded:</strong> Fewer than 8 rabbits within 5-tile radius</li>
+        </ol>
+
+        <h4>Reproduction Process</h4>
+        <ol>
+            <li>Rabbit's reproduction timer reaches 40 seconds</li>
+            <li>Game checks all requirements above</li>
+            <li>If all requirements met:
+                <ul>
+                    <li>Select random adjacent tile with empty animal layer</li>
+                    <li>Spawn baby rabbit on that tile's animal layer</li>
+                    <li>Baby starts with full health, can move/eat immediately</li>
+                    <li>Reset parent's reproduction timer to 0</li>
+                </ul>
+            </li>
+            <li>If requirements not met: Rabbit waits, checks again next frame</li>
+        </ol>
+
+        <p><strong>Note:</strong> Baby can spawn on tile with grass (ground layer). Two-layer system allows this.</p>
+
+        <h3>Visual States</h3>
+        <table>
+            <tr>
+                <th>State</th>
+                <th>Visual</th>
+                <th>Trigger</th>
+            </tr>
+            <tr>
+                <td>Healthy</td>
+                <td>Bright orange (#fb923c), 100% opacity, solid border</td>
+                <td>Hunger < 6 seconds</td>
+            </tr>
+            <tr>
+                <td>Hungry</td>
+                <td>Faded orange (#fed7aa), 60% opacity, light border</td>
+                <td>Hunger > 6 seconds</td>
+            </tr>
+            <tr>
+                <td>Dying</td>
+                <td>Fade out animation (0.5 seconds)</td>
+                <td>Hunger reaches 12 seconds OR eaten by fox</td>
+            </tr>
+        </table>
+
+        <h3>Complete Rabbit Timing Summary</h3>
+        <table>
+            <tr>
+                <th>Event</th>
+                <th>Timing</th>
+            </tr>
+            <tr>
+                <td>Movement speed</td>
+                <td>2 tiles per second</td>
+            </tr>
+            <tr>
+                <td>Detection range</td>
+                <td>3 tiles radius</td>
+            </tr>
+            <tr>
+                <td>Hunger timer (starvation)</td>
+                <td>12 seconds</td>
+            </tr>
+            <tr>
+                <td>Eating frequency</td>
+                <td>Every 12 seconds</td>
+            </tr>
+            <tr>
+                <td>Grass per day</td>
+                <td>~2.5 tiles</td>
+            </tr>
+            <tr>
+                <td>Reproduction rate</td>
+                <td>Every 40 seconds</td>
+            </tr>
+            <tr>
+                <td>Babies per day</td>
+                <td>0.75 per rabbit</td>
+            </tr>
+        </table>
+
+        <h2 id="fox">6. 🦊 FOX MECHANICS (Complete Details)</h2>
+        
+        <h3>Purpose</h3>
+        <p>Top predator. Controls rabbit population. No natural predators.</p>
+
+        <h3>Movement & Hunting</h3>
+        
+        <div class="timing-box">
+            <h4>Movement Speed: 4 tiles per second</h4>
+            <p>Fox moves 2× faster than rabbits. Can cross entire 20×20 field in 5 seconds.</p>
+        </div>
+
+        <h4>Movement Behavior</h4>
+        <table>
+            <tr>
+                <th>Fox State</th>
+                <th>Movement Pattern</th>
+            </tr>
+            <tr>
+                <td>Well-Fed (hunger < 10 sec)</td>
+                <td>Random patrol in any direction</td>
+            </tr>
+            <tr>
+                <td>Hungry (hunger > 10 sec)</td>
+                <td>Active hunting - chases nearest rabbit at full speed</td>
+            </tr>
+            <tr>
+                <td>No rabbits in range</td>
+                <td>Random patrol (searching for prey)</td>
+            </tr>
+        </table>
+
+        <h4>Detection Range</h4>
+        <p><strong>Foxes can "see" rabbits within 5 tiles</strong></p>
+        <ul>
+            <li>Fox at position (10, 10) can detect rabbits at (5-15, 5-15) - an 11×11 area</li>
+            <li>Larger detection range than rabbits (5 vs 3 tiles) - predator advantage</li>
+            <li>If rabbit in range, fox immediately moves toward it at 4 tiles/sec</li>
+        </ul>
+
+        <div class="danger">
+            <h4>⚠️ Critical Distance Problem</h4>
+            <p>If fox is more than <strong>15 tiles</strong> from nearest rabbit, it will likely starve before finding prey!</p>
+            <p><strong>Why?</strong> Fox has 25-second starvation timer. Random patrol on larger 32×32 grid takes 45-90+ seconds to find distant rabbits.</p>
+        </div>
+
+        <h3>Hunting & Eating</h3>
+        
+        <div class="timing-box">
+            <h4>How Often Do Foxes Eat Rabbits?</h4>
+            <p><strong>Hunger Timer: Must eat every 25 seconds</strong></p>
+            <p><strong>Eating frequency: Every 25 seconds (when rabbits available)</strong></p>
+            <p><strong>Rabbits consumed per day: ~1.2 rabbits</strong></p>
+        </div>
+
+        <h4>Hunting Process (Step-by-Step)</h4>
+        <ol>
+            <li>Fox detects rabbit within 5-tile radius</li>
+            <li>Fox moves toward rabbit at 4 tiles/second</li>
+            <li>Rabbit tries to flee (but moves at 2 tiles/sec - half fox speed)</li>
+            <li>Fox eventually catches up due to speed advantage</li>
+            <li>When fox moves to same tile as rabbit:
+                <ul>
+                    <li>Rabbit is removed from animal layer (eaten)</li>
+                    <li>Fox occupies that tile's animal layer</li>
+                    <li>Fox's hunger timer resets to 0</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p><strong>Hunting Success Rate: 90%</strong> - Foxes almost always catch rabbits they chase due to speed advantage.</p>
+
+        <h4>Starvation</h4>
+        <ul>
+            <li>If hunger timer reaches 25 seconds without eating → fox dies</li>
+            <li>Dead fox removed from animal layer</li>
+            <li>Tile becomes available for other animals</li>
+        </ul>
+
+        <h3>Reproduction</h3>
+        
+        <div class="timing-box">
+            <h4>How Often Do Foxes Reproduce?</h4>
+            <p><strong>Reproduction Rate: 1 baby every 90 seconds (when well-fed)</strong></p>
+            <p><strong>Per Day: 0.33 babies per fox per day</strong></p>
+        </div>
+
+        <h4>Reproduction Requirements (ALL must be true)</h4>
+        <ol>
+            <li><strong>Well-fed:</strong> Fox must have eaten within last 10 seconds</li>
+            <li><strong>Cooldown complete:</strong> 90 seconds passed since last reproduction</li>
+            <li><strong>Space available:</strong> At least ONE adjacent tile with empty animal layer</li>
+            <li><strong>Not overcrowded:</strong> Fewer than 4 foxes within 5-tile radius</li>
+            <li><strong>Prey available:</strong> At least 3 rabbits within 8-tile radius</li>
+        </ol>
+
+        <p><strong>Why prey requirement?</strong> Foxes won't reproduce if insufficient prey nearby. Prevents fox overpopulation in rabbit-scarce areas.</p>
+
+        <h4>Reproduction Process</h4>
+        <ol>
+            <li>Fox's reproduction timer reaches 90 seconds</li>
+            <li>Game checks all requirements above</li>
+            <li>If all requirements met:
+                <ul>
+                    <li>Select random adjacent tile with empty animal layer</li>
+                    <li>Spawn baby fox on that tile's animal layer</li>
+                    <li>Baby starts with full health, can hunt immediately</li>
+                    <li>Reset parent's reproduction timer to 0</li>
+                </ul>
+            </li>
+            <li>If requirements not met: Fox waits, checks again next frame</li>
+        </ol>
+
+        <h3>Complete Fox Timing Summary</h3>
+        <table>
+            <tr>
+                <th>Event</th>
+                <th>Timing</th>
+            </tr>
+            <tr>
+                <td>Movement speed</td>
+                <td>4 tiles per second</td>
+            </tr>
+            <tr>
+                <td>Detection range</td>
+                <td>5 tiles radius</td>
+            </tr>
+            <tr>
+                <td>Hunger timer (starvation)</td>
+                <td>25 seconds</td>
+            </tr>
+            <tr>
+                <td>Eating frequency</td>
+                <td>Every 25 seconds</td>
+            </tr>
+            <tr>
+                <td>Rabbits per day</td>
+                <td>~1.2 rabbits</td>
+            </tr>
+            <tr>
+                <td>Reproduction rate</td>
+                <td>Every 90 seconds</td>
+            </tr>
+            <tr>
+                <td>Babies per day</td>
+                <td>0.33 per fox</td>
+            </tr>
+            <tr>
+                <td>Hunting success rate</td>
+                <td>90%</td>
+            </tr>
+        </table>
+
+        <h2 id="spatial">7. Spatial Placement & Strategy</h2>
+        
+        <div class="highlight">
+            <h3>Why Placement Matters</h3>
+            <p>The ratio (10 Grass : 3 Rabbits : 1 Fox) only works if organisms can REACH each other before starving. Distance kills!</p>
+        </div>
+
+        <h3>Distance & Starvation Examples</h3>
+        
+        <h4>Example 1: Fox in Corner, Rabbits in Opposite Corner</h4>
+        <ul>
+            <li>Distance: 45 tiles (diagonal across 32×32 grid)</li>
+            <li>Fox detection: 5 tiles (won't see rabbits until very close)</li>
+            <li>Fox must randomly patrol to find rabbits</li>
+            <li>Random patrol: 45-90+ seconds to stumble into detection range</li>
+            <li><strong>Fox starvation timer: 25 seconds</strong></li>
+            <li><strong>Result: Fox dies before finding food!</strong></li>
+        </ul>
+
+        <h4>Example 2: Rabbit Far from Grass</h4>
+        <ul>
+            <li>Rabbit 15+ tiles from nearest grass</li>
+            <li>Rabbit detection: 3 tiles (won't see grass until close)</li>
+            <li>Rabbit must randomly wander to find grass</li>
+            <li>Random wander: 30-60 seconds to find distant grass</li>
+            <li><strong>Rabbit starvation timer: 12 seconds</strong></li>
+            <li><strong>Result: Rabbit dies before finding food!</strong></li>
+        </ul>
+
+        <h3>Optimal Placement Guidelines</h3>
+        
+        <h4>Grass Placement</h4>
+        <div class="success">
+            <p><strong>✅ DO:</strong></p>
+            <ul>
+                <li>Create 8-12 starter clusters of 30-50 grass tiles each (grass will spread naturally)</li>
+                <li>Spread starter clusters across field (not concentrated in one area)</li>
+                <li>Place in strategic locations where rabbits will be placed</li>
+                <li>Total initial: 300-400 tiles is sufficient (will spread to 800-1000 naturally)</li>
+                <li><strong>Remember:</strong> Grass spreads to 100% coverage over time if left unchecked</li>
+            </ul>
+        </div>
+
+        <div class="danger">
+            <p><strong>❌ DON'T:</strong></p>
+            <ul>
+                <li>Worry about covering the entire field - grass spreads organically</li>
+                <li>Place less than 200 tiles total (too slow initial growth on larger field)</li>
+                <li>Place grass only in corners (spreads too slowly to center on 32×32 grid)</li>
+            </ul>
+        </div>
+
+        <h4>Rabbit Placement</h4>
+        <div class="success">
+            <p><strong>✅ DO:</strong></p>
+            <ul>
+                <li>Place within 3-5 tiles of grass clusters</li>
+                <li>Distribute 40-60 rabbits per major grass zone</li>
+                <li>Spread across multiple zones (don't cluster all together)</li>
+                <li>Total: 400-500 rabbits for balanced 32×32 field</li>
+            </ul>
+        </div>
+
+        <div class="danger">
+            <p><strong>❌ DON'T:</strong></p>
+            <ul>
+                <li>Place more than 15 tiles from nearest grass (starvation risk on larger grid)</li>
+                <li>Cluster all rabbits in one spot (local grass depletion)</li>
+                <li>Place more than 600 rabbits (overpopulation → grass extinction)</li>
+            </ul>
+        </div>
+
+        <h4>Fox Placement</h4>
+        <div class="success">
+            <p><strong>✅ DO:</strong></p>
+            <ul>
+                <li>Place in center or between rabbit groups</li>
+                <li>Keep within 10-15 tiles of rabbit clusters</li>
+                <li>Spread foxes out (20-30 per zone)</li>
+                <li>Total: 200-250 foxes for balanced 32×32 field</li>
+            </ul>
+        </div>
+
+        <div class="danger">
+            <p><strong>❌ DON'T:</strong></p>
+            <ul>
+                <li>Place in corners away from rabbits (will never find prey on large grid)</li>
+                <li>Place directly on top of rabbit cluster (instant massacre)</li>
+                <li>Place more than 300 foxes (predator overpopulation → rabbit extinction)</li>
+            </ul>
+        </div>
+
+        <h3>Recommended Starting Pattern: Quadrant System</h3>
+        <p>Divide 32×32 field into 4 equal 16×16 regions:</p>
+        <table>
+            <tr>
+                <th>Region</th>
+                <th>Grass (Initial)</th>
+                <th>Rabbits</th>
+                <th>Foxes</th>
+            </tr>
+            <tr>
+                <td>Top-Left (0-15, 0-15)</td>
+                <td>75-100 tiles</td>
+                <td>100-125</td>
+                <td>50-65</td>
+            </tr>
+            <tr>
+                <td>Top-Right (16-31, 0-15)</td>
+                <td>75-100 tiles</td>
+                <td>100-125</td>
+                <td>50-65</td>
+            </tr>
+            <tr>
+                <td>Bottom-Left (0-15, 16-31)</td>
+                <td>75-100 tiles</td>
+                <td>100-125</td>
+                <td>50-65</td>
+            </tr>
+            <tr>
+                <td>Bottom-Right (16-31, 16-31)</td>
+                <td>75-100 tiles</td>
+                <td>100-125</td>
+                <td>50-65</td>
+            </tr>
+            <tr>
+                <td><strong>Total Initial</strong></td>
+                <td><strong>300-400</strong></td>
+                <td><strong>400-500</strong></td>
+                <td><strong>200-260</strong></td>
+            </tr>
+        </table>
+
+        <p><strong>Why this works:</strong> Each quadrant is self-contained with starter grass that spreads naturally. If one region collapses, others survive. Grass will organically spread to fill entire field over time, reaching 800-1000 tiles at equilibrium.</p>
+
+        <h2 id="winloss">8. Win/Loss Conditions</h2>
+        
+        <div class="success">
+            <h3>🏆 VICTORY: Self-Sustaining Ecosystem</h3>
+            <p><strong>Win Requirement: Keep all 3 species alive for 10 consecutive game days</strong></p>
+            <p>(= 5 minutes real-time at 1x speed)</p>
+            
+            <h4>What "Self-Sustaining" Means:</h4>
+            <p>You successfully populated the empty grid in a way that allows all three species to coexist indefinitely without your intervention. The ecosystem balances itself naturally through the food chain you created.</p>
+            
+            <h4>Requirements:</h4>
+            <ul>
+                <li>All three species continuously exist (never reach 0 population)</li>
+                <li>No species drops below 2 individuals at any point</li>
+                <li>Populations show natural oscillation (healthy ecosystem cycles)</li>
+                <li>Your initial placement strategy was successful!</li>
+            </ul>
+        </div>
+
+        <div class="danger">
+            <h3>❌ GAME OVER: Ecosystem Collapse</h3>
+            <p><strong>Game ends immediately when any species reaches population = 0</strong></p>
+            
+            <h4>Common Failure Scenarios:</h4>
+            
+            <p><strong>1. Fox Overpopulation</strong></p>
+            <ul>
+                <li>Setup: Too many foxes (15+)</li>
+                <li>Result: Foxes hunt all rabbits within days → Rabbits extinct → Foxes starve → Total extinction</li>
+            </ul>
+
+            <p><strong>2. Grass Depletion</strong></p>
+            <ul>
+                <li>Setup: Too few grass starter patches (<20 tiles) or too many rabbits (>50)</li>
+                <li>Result: Rabbits consume grass faster than it can spread → Grass coverage shrinks → Rabbits starve → Foxes starve → Total extinction</li>
+                <li><strong>Note:</strong> With 100% spread capability, grass depletion is less common but still possible if rabbit population is extremely high</li>
+            </ul>
+
+            <p><strong>3. No Predator Control</strong></p>
+            <ul>
+                <li>Setup: Too few foxes (0-3) for rabbit population</li>
+                <li>Result: Rabbits multiply uncontrolled → Overpopulation → All grass consumed → Mass rabbit starvation → Total extinction</li>
+            </ul>
+
+            <p><strong>4. Corner Isolation</strong></p>
+            <ul>
+                <li>Setup: Organisms placed in corners, far from food/prey</li>
+                <li>Result: Organisms starve before finding food due to distance + detection limits</li>
+            </ul>
+        </div>
+
+        <h2 id="ui">9. UI Specifications</h2>
+        
+        <h3>Screen Layout (375×667px)</h3>
+        
+        <table>
+            <tr>
+                <th>Component</th>
+                <th>Height</th>
+                <th>Contents</th>
+                <th>Background Color</th>
+            </tr>
+            <tr>
+                <td>Top Bar</td>
+                <td>60px</td>
+                <td>Settings, Info, Title, Graph/Map toggles</td>
+                <td>Dark gradient (#475569 to #334155)</td>
+            </tr>
+            <tr>
+                <td>Main Field</td>
+                <td>~427px (flexible)</td>
+                <td>32×32 grid with organisms, trial zones, overlays</td>
+                <td><strong>Light Grey (#D3D3D3 or similar)</strong></td>
+            </tr>
+            <tr>
+                <td>Stats Bar</td>
+                <td>60px</td>
+                <td>Population counts, balance %, time</td>
+                <td>Dark slate (#1e293b)</td>
+            </tr>
+            <tr>
+                <td>Controls</td>
+                <td>~120px (varies)</td>
+                <td>Phase-specific controls (setup or playing)</td>
+                <td>Medium slate (#334155)</td>
+            </tr>
+        </table>
+
+        <div class="info">
+            <h4>Main Field Background Specification</h4>
+            <p><strong>Background Color:</strong> Light grey (#D3D3D3, #DCDCDC, or similar light grey tone)</p>
+            <p><strong>Purpose:</strong> Provides neutral background that makes grass (green), rabbits (orange), and foxes (red) stand out clearly</p>
+            <p><strong>Alternative:</strong> Can use #E0E0E0 or #EFEFEF for slightly different grey tones</p>
+        </div>
+
+        <h3>Setup Phase Controls</h3>
+        <ul>
+            <li><strong>Trial Mode Toggle:</strong> Shows green safe zones and red risk zones</li>
+            <li><strong>Tool Selection:</strong> 3 buttons (Grass, Rabbit, Fox)</li>
+            <li><strong>Instructions:</strong> "Touch & hold to place"</li>
+            <li><strong>Action Buttons:</strong> "Start Simulation" (primary), "Clear" (secondary)</li>
+        </ul>
+
+        <h3>Playing Phase Controls</h3>
+        <ul>
+            <li><strong>Pause/Play Button:</strong> Large, easy to tap</li>
+            <li><strong>Speed Slider:</strong> 0.5x, 1x, 2x, 4x with visual markers</li>
+            <li><strong>Reset Button:</strong> Returns to setup phase</li>
+        </ul>
+
+        <h3>Visual Feedback</h3>
+        <ul>
+            <li><strong>Field Background:</strong> Light grey (#D3D3D3) - neutral background for organism visibility</li>
+            <li><strong>Grid Lines:</strong> Subtle grey lines (20% opacity) showing 32×32 grid</li>
+            <li><strong>Healthy organisms:</strong> Bright colors, 100% opacity</li>
+            <li><strong>Hungry organisms:</strong> Faded colors, 60% opacity</li>
+            <li><strong>Movement trails:</strong> Faint 30% opacity line behind moving animals</li>
+            <li><strong>Population graph:</strong> Toggle overlay showing 3 populations over time</li>
+        </ul>
+
+        <h2 id="technical">10. Technical Implementation</h2>
+        
+        <h3>Data Structure</h3>
+        <pre>
+// Tile Structure (32×32 = 1,024 tiles)
+{
+    x: 5,
+    y: 10,
+    groundLayer: null | grassObjectId,
+    animalLayer: null | rabbitObjectId | foxObjectId
+}
+
+// Organism Structure  
+{
+    id: unique_id,
+    type: "grass" | "rabbit" | "fox",
+    position: {x: 5, y: 10},
+    hungerTimer: 0, // seconds (rabbits/foxes only)
+    reproductionTimer: 0, // seconds
+    isAlive: true
+}
+</pre>
+
+        <h3>Core Game Loop (30 FPS for logic)</h3>
+        <pre>
+EVERY FRAME (logic at 30 FPS):
+    1. Update all organism timers (+deltaTime)
+    2. Process movement for rabbits/foxes
+    3. Check for eating:
+       - Rabbits: if tile has grass, eat it
+       - Foxes: if tile has rabbit, eat it
+    4. Check for starvation (timer exceeded)
+    5. Check for reproduction (timer + conditions)
+    6. Process grass growth (every 5 sec):
+       - Each grass tile attempts to spread to adjacent tile
+       - If adjacent tile's ground layer is empty, spawn grass
+       - No coverage limit - can spread to 100% of field
+    7. Update UI displays
+    8. Check win/loss conditions
+</pre>
+
+        <h3>Collision Detection</h3>
+        <p><strong>Two-Layer Collision System:</strong></p>
+        <ul>
+            <li>Maintain 32×32 grid where each tile tracks both layers (1,024 tiles total)</li>
+            <li>Before moving rabbit/fox: Check if destination tile's animal layer is empty (or fox moving to rabbit tile)</li>
+            <li>Grass growth: Check if destination tile's ground layer is empty</li>
+            <li>No collision between grass and animals (different layers)</li>
+        </ul>
+
+        <h3>Performance Optimization</h3>
+        <ul>
+            <li><strong>Max Organisms:</strong> 1,500-2,000 total recommended for 32×32 grid</li>
+            <li>Target: 1,000 grass + 500 rabbits + 250 foxes = 1,750 total</li>
+            <li><strong>Render FPS:</strong> 60 FPS</li>
+            <li><strong>Logic FPS:</strong> 30 FPS (update AI every 2 frames)</li>
+            <li><strong>Optimization:</strong> Use spatial hashing with 8×8 chunks (divide 32×32 into 16 chunks)</li>
+            <li>Object pooling essential for 1,000+ organisms</li>
+        </ul>
+
+        <h2 id="balance">11. Balance & Testing</h2>
+        
+        <h3>Target Population Ratios</h3>
+        <div class="timing-box">
+            <h4>Magic Ratio: 10 Grass : 5 Rabbits : 2.5 Foxes (Adjusted for larger grid)</h4>
+            
+            <p><strong>For 32×32 grid (1,024 tiles) - INITIAL PLACEMENT:</strong></p>
+            <ul>
+                <li>Grass: 300-400 tiles initially (will spread to 800-1,000 naturally)</li>
+                <li>Rabbits: 400-500 individuals</li>
+                <li>Foxes: 200-250 individuals</li>
+            </ul>
+            
+            <p><strong>During gameplay:</strong> Grass coverage will naturally expand to 800-1,000 tiles based on rabbit consumption rate.</p>
+        </div>
+
+        <h3>Why This Ratio Works</h3>
+        <table>
+            <tr>
+                <th>Production</th>
+                <th>Consumption</th>
+                <th>Balance</th>
+            </tr>
+            <tr>
+                <td>Starting 350 grass × 6/day = 2,100 new grass/day</td>
+                <td>450 rabbits × 2.5/day = 1,125 grass eaten/day</td>
+                <td>Grass production > consumption initially ✓</td>
+            </tr>
+            <tr>
+                <td>As grass spreads to 900+ tiles → 5,400+ new grass/day</td>
+                <td>Consumption remains ~1,125 grass/day</td>
+                <td>Grass expands to fill field ✓</td>
+            </tr>
+            <tr>
+                <td>450 rabbits × 0.75/day = 337 baby rabbits/day</td>
+                <td>225 foxes × 1.2/day = 270 rabbits eaten/day</td>
+                <td>Rabbit growth > fox consumption ✓</td>
+            </tr>
+            <tr>
+                <td>225 foxes × 0.33/day = 74 baby foxes/day</td>
+                <td>-</td>
+                <td>Slow fox growth prevents overpopulation ✓</td>
+            </tr>
+        </table>
+        
+        <p><strong>Key Insight:</strong> On larger 32×32 grid, grass starts with 300-400 tiles but spreads exponentially to 800-1,000 tiles. This abundant coverage supports larger populations of rabbits (500) and foxes (250). The ecosystem scales proportionally to grid size.</p>
+
+        <h3>Testing Checklist</h3>
+        <ul>
+            <li>☐ 32×32 grid renders correctly with 1,024 tiles</li>
+            <li>☐ Grass spreads every 5 seconds to adjacent tiles</li>
+            <li>☐ Grass can spread to 100% coverage (entire 1,024 tile field)</li>
+            <li>☐ Grass spreads to tiles that were never manually planted</li>
+            <li>☐ Grass regrows 15 seconds after eaten</li>
+            <li>☐ Rabbits eat grass when on same tile</li>
+            <li>☐ Rabbits starve at 12 seconds</li>
+            <li>☐ Rabbits reproduce every 40 seconds (when fed)</li>
+            <li>☐ Foxes catch rabbits when on same tile</li>
+            <li>☐ Foxes starve at 25 seconds</li>
+            <li>☐ Foxes reproduce every 90 seconds (when fed + prey nearby)</li>
+            <li>☐ Victory triggers at 10 days with all species alive</li>
+            <li>☐ Game over triggers when any species hits 0</li>
+            <li>☐ Balanced setup (350 grass initial/450 rabbits/225 foxes) survives 10 days</li>
+            <li>☐ Two-layer system allows grass + animal on same tile</li>
+            <li>☐ Grass naturally expands from starter patches to 800-1,000 tiles</li>
+            <li>☐ Can support 1,000+ grass, 500 rabbits, 250 foxes simultaneously</li>
+        </ul>
+
+        <hr style="margin: 40px 0;">
+        
+        <div class="success">
+            <h2>Summary for Developer</h2>
+            
+            <p><strong>This document contains EVERYTHING needed to build the game:</strong></p>
+            
+            <h3>Critical Mechanics:</h3>
+            <ol>
+                <li><strong>Blank start:</strong> Grid starts completely empty - player must populate it from scratch</li>
+                <li><strong>Goal:</strong> Create a self-sustaining ecosystem through strategic placement</li>
+                <li><strong>Two-layer grid:</strong> Ground (grass) + Animal (rabbits/foxes)</li>
+                <li><strong>Grass:</strong> Spreads every 5 sec to ANY tile (even unplanted areas), can reach 100% coverage, eaten instantly by rabbits on same tile, regrows in 15 sec</li>
+                <li><strong>Rabbits:</strong> Move 2 tiles/sec, eat every 12 sec, starve at 12 sec, reproduce every 40 sec</li>
+                <li><strong>Foxes:</strong> Move 4 tiles/sec, eat every 25 sec, starve at 25 sec, reproduce every 90 sec</li>
+                <li><strong>Win:</strong> 10 days all alive. <strong>Lose:</strong> Any species extinct</li>
+            </ol>
+
+            <h3>Start Development With:</h3>
+            <ol>
+                <li>Empty 32×32 grid (1,024 blank tiles on startup)</li>
+                <li>Two-layer grid system (ground + animal layers)</li>
+                <li>Touch-and-hold placement in setup phase (allows continuous placement on empty tiles)</li>
+                <li>Basic movement AI (rabbits seek grass, foxes chase rabbits)</li>
+                <li>Eating mechanics (same tile = consume)</li>
+                <li>Hunger/starvation timers</li>
+                <li>Win/loss detection (10 days survival vs extinction)</li>
+            </ol>
+            
+            <p><strong>Remember:</strong> The game's challenge comes from giving players a blank canvas and letting them experiment to find the balance that creates a self-sustaining ecosystem!</p>
+        </div>
+
+        <p style="text-align: center; color: #7f8c8d; margin-top: 40px;">
+            <strong>Document Version:</strong> 1.0 | <strong>Grid:</strong> 20×20 (400 tiles) | <strong>Layers:</strong> 2 (ground + animal)<br>
+            <strong>Last Updated:</strong> October 2025
+        </p>
     </div>
-
-    <script>
-        const FIXTURES = {
-            5: [
-                { teams: [[1,2],[3,4]], rest: [5] },
-                { teams: [[1,3],[4,5]], rest: [2] },
-                { teams: [[1,4],[2,5]], rest: [3] },
-                { teams: [[1,5],[2,3]], rest: [4] },
-                { teams: [[2,4],[3,5]], rest: [1] }
-            ],
-            6: [
-                { teams: [[1,2],[3,4]], rest: [5,6] },
-                { teams: [[5,6],[1,3]], rest: [2,4] },
-                { teams: [[2,4],[1,6]], rest: [3,5] },
-                { teams: [[3,6],[2,5]], rest: [1,4] },
-                { teams: [[1,4],[3,5]], rest: [2,6] },
-                { teams: [[2,6],[4,5]], rest: [1,3] },
-                { teams: [[1,6],[2,3]], rest: [4,5] },
-                { teams: [[4,6],[3,5]], rest: [1,2] },
-                { teams: [[1,3],[2,4]], rest: [5,6] },
-                { teams: [[1,5],[3,4]], rest: [2,6] },
-                { teams: [[2,5],[4,6]], rest: [1,3] },
-                { teams: [[1,2],[5,6]], rest: [3,4] }
-            ],
-            7: [
-                { teams: [[1,2],[3,4]], rest: [5,6,7] },
-                { teams: [[1,3],[4,5]], rest: [2,6,7] },
-                { teams: [[1,4],[5,6]], rest: [2,3,7] },
-                { teams: [[1,5],[6,7]], rest: [2,3,4] },
-                { teams: [[1,6],[2,3]], rest: [4,5,7] },
-                { teams: [[1,7],[2,4]], rest: [3,5,6] },
-                { teams: [[2,5],[3,6]], rest: [1,4,7] },
-                { teams: [[2,6],[4,7]], rest: [1,3,5] },
-                { teams: [[2,7],[5,6]], rest: [1,3,4] },
-                { teams: [[3,5],[4,6]], rest: [1,2,7] },
-                { teams: [[3,7],[4,5]], rest: [1,2,6] },
-                { teams: [[5,7],[3,4]], rest: [1,2,6] },
-                { teams: [[6,7],[2,3]], rest: [1,4,5] },
-                { teams: [[1,2],[4,6]], rest: [3,5,7] },
-                { teams: [[1,3],[5,7]], rest: [2,4,6] }
-            ],
-            8: [
-                { teams: [[1,2],[3,4]], rest: [5,6,7,8] },
-                { teams: [[1,3],[5,6]], rest: [2,4,7,8] },
-                { teams: [[1,4],[7,8]], rest: [2,3,5,6] },
-                { teams: [[1,5],[2,6]], rest: [3,4,7,8] },
-                { teams: [[1,6],[3,7]], rest: [2,4,5,8] },
-                { teams: [[1,7],[4,8]], rest: [2,3,5,6] },
-                { teams: [[1,8],[2,5]], rest: [3,4,6,7] },
-                { teams: [[2,3],[4,5]], rest: [1,6,7,8] },
-                { teams: [[2,4],[6,7]], rest: [1,3,5,8] },
-                { teams: [[2,7],[5,8]], rest: [1,3,4,6] },
-                { teams: [[2,8],[3,6]], rest: [1,4,5,7] },
-                { teams: [[3,5],[6,8]], rest: [1,2,4,7] },
-                { teams: [[3,8],[4,7]], rest: [1,2,5,6] },
-                { teams: [[4,6],[5,7]], rest: [1,2,3,8] }
-            ],
-            9: [
-                { teams: [[1,2],[3,4]], rest: [5,6,7,8,9] },
-                { teams: [[1,3],[6,8]], rest: [2,4,5,7,9] },
-                { teams: [[1,4],[7,8]], rest: [2,3,5,6,9] },
-                { teams: [[1,5],[2,7]], rest: [3,4,6,8,9] },
-                { teams: [[1,6],[3,9]], rest: [2,4,5,7,8] },
-                { teams: [[1,7],[4,5]], rest: [2,3,6,8,9] },
-                { teams: [[1,8],[6,9]], rest: [2,3,4,5,7] },
-                { teams: [[1,9],[2,8]], rest: [3,4,5,6,7] },
-                { teams: [[2,3],[5,7]], rest: [1,4,6,8,9] },
-                { teams: [[2,4],[5,9]], rest: [1,3,6,7,8] },
-                { teams: [[2,5],[3,8]], rest: [1,4,6,7,9] },
-                { teams: [[2,6],[4,8]], rest: [1,3,5,7,9] },
-                { teams: [[2,9],[6,7]], rest: [1,3,4,5,8] },
-                { teams: [[3,5],[4,9]], rest: [1,2,6,7,8] },
-                { teams: [[3,6],[5,8]], rest: [1,2,4,7,9] },
-                { teams: [[3,7],[8,9]], rest: [1,2,4,5,6] },
-                { teams: [[4,6],[7,9]], rest: [1,2,3,5,8] }
-            ]
-        };
-
-        const TOURNAMENT_INFO = {
-            5: { rounds: 5, gamesPerPlayer: 4 },
-            6: { rounds: 12, gamesPerPlayer: 8 },
-            7: { rounds: 15, gamesPerPlayer: 10 },
-            8: { rounds: 14, gamesPerPlayer: 7 },
-            9: { rounds: 17, gamesPerPlayer: 8 }
-        };
-
-        let state = {
-            playerCount: 6,
-            playerNames: [],
-            fixedPoints: false,
-            totalPoints: 16,
-            scores: [],
-            tournamentStarted: false
-        };
-
-        function init() {
-            loadState();
-            setPlayerCount(state.playerCount);
-            if (state.tournamentStarted) {
-                switchTab('tournament');
-                renderTournament();
-                renderLeaderboard();
-            }
-        }
-
-        function saveState() {
-            localStorage.setItem('americanoPadelTournament', JSON.stringify(state));
-        }
-
-        function loadState() {
-            const saved = localStorage.getItem('americanoPadelTournament');
-            if (saved) {
-                state = JSON.parse(saved);
-                if (state.fixedPoints) {
-                    document.getElementById('fixedPointsCheckbox').checked = true;
-                    document.getElementById('fixedPointsOptions').style.display = 'block';
-                    document.getElementById('totalPointsInput').value = state.totalPoints;
-                }
-            }
-        }
-
-        function setPlayerCount(count) {
-            state.playerCount = count;
-            document.querySelectorAll('.player-count-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (parseInt(btn.textContent) === count) {
-                    btn.classList.add('active');
-                }
-            });
-            const info = TOURNAMENT_INFO[count];
-            document.getElementById('tournamentInfo').textContent = 
-                `ℹ️ ${info.rounds} rounds • ${info.gamesPerPlayer} games per player • Perfect balance`;
-            generatePlayerInputs();
-            saveState();
-        }
-
-        function generatePlayerInputs() {
-            const container = document.getElementById('playerInputs');
-            container.innerHTML = '';
-            for (let i = 0; i < state.playerCount; i++) {
-                const group = document.createElement('div');
-                group.className = 'player-input-group';
-                const label = document.createElement('label');
-                label.textContent = `Player ${i + 1}:`;
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = state.playerNames[i] || `Player ${i + 1}`;
-                input.onchange = (e) => {
-                    state.playerNames[i] = e.target.value;
-                    saveState();
-                };
-                group.appendChild(label);
-                group.appendChild(input);
-                container.appendChild(group);
-            }
-        }
-
-        function toggleFixedPoints() {
-            state.fixedPoints = document.getElementById('fixedPointsCheckbox').checked;
-            document.getElementById('fixedPointsOptions').style.display = 
-                state.fixedPoints ? 'block' : 'none';
-            saveState();
-        }
-
-        function startTournament() {
-            const inputs = document.querySelectorAll('#playerInputs input');
-            state.playerNames = Array.from(inputs).map(input => input.value || input.placeholder);
-            state.fixedPoints = document.getElementById('fixedPointsCheckbox').checked;
-            state.totalPoints = parseInt(document.getElementById('totalPointsInput').value) || 16;
-            if (state.scores.length === 0) {
-                const fixtures = FIXTURES[state.playerCount];
-                state.scores = fixtures.map(() => ({ team1: null, team2: null }));
-            }
-            state.tournamentStarted = true;
-            saveState();
-            const info = TOURNAMENT_INFO[state.playerCount];
-            document.getElementById('headerInfo').textContent = 
-                `${state.playerCount} Players • ${info.rounds} Rounds • Auto-saved!`;
-            switchTab('tournament');
-            renderTournament();
-            renderLeaderboard();
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            
-            const tabs = document.querySelectorAll('.tab');
-            if (tab === 'settings') {
-                tabs[0].classList.add('active');
-            } else if (tab === 'tournament') {
-                tabs[1].classList.add('active');
-            } else if (tab === 'leaderboard') {
-                tabs[2].classList.add('active');
-                renderLeaderboard();
-            }
-            
-            document.getElementById(tab).classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function renderTournament() {
-            renderMatchSchedule();
-        }
-
-        function calculatePlayerScores() {
-            const playerScores = Array(state.playerCount).fill(0);
-            const fixtures = FIXTURES[state.playerCount];
-            fixtures.forEach((fixture, roundIndex) => {
-                const score = state.scores[roundIndex];
-                if (score.team1 !== null && score.team2 !== null) {
-                    fixture.teams[0].forEach(playerNum => {
-                        playerScores[playerNum - 1] += score.team1;
-                    });
-                    fixture.teams[1].forEach(playerNum => {
-                        playerScores[playerNum - 1] += score.team2;
-                    });
-                }
-            });
-            return playerScores;
-        }
-
-        function renderLeaderboard() {
-            if (!state.tournamentStarted) return;
-            
-            const container = document.getElementById('leaderboardContent');
-            const playerScores = calculatePlayerScores();
-            const players = state.playerNames.map((name, index) => ({
-                name,
-                score: playerScores[index],
-                index
-            }));
-            players.sort((a, b) => b.score - a.score);
-            container.innerHTML = '';
-            players.forEach((player, rank) => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                let medal = '';
-                if (rank === 0) medal = '🥇 ';
-                else if (rank === 1) medal =
+</body>
+</html>
